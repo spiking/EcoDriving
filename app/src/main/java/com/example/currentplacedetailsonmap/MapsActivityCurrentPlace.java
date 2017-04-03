@@ -2,6 +2,7 @@ package com.example.currentplacedetailsonmap;
 
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -9,6 +10,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -32,6 +34,15 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.mikepenz.materialdrawer.AccountHeader;
+import com.mikepenz.materialdrawer.AccountHeaderBuilder;
+import com.mikepenz.materialdrawer.Drawer;
+import com.mikepenz.materialdrawer.DrawerBuilder;
+import com.mikepenz.materialdrawer.holder.BadgeStyle;
+import com.mikepenz.materialdrawer.model.DividerDrawerItem;
+import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
+import com.mikepenz.materialdrawer.model.SecondaryDrawerItem;
+import com.mikepenz.materialdrawer.model.interfaces.IProfile;
 
 /**
  * An activity that displays a map showing the place at the device's current location.
@@ -39,8 +50,8 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 public class MapsActivityCurrentPlace extends AppCompatActivity
         implements OnMapReadyCallback,
-                GoogleApiClient.ConnectionCallbacks,
-                GoogleApiClient.OnConnectionFailedListener {
+        GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener {
 
     private static final String TAG = MapsActivityCurrentPlace.class.getSimpleName();
     private GoogleMap mMap;
@@ -71,6 +82,9 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
     private String[] mLikelyPlaceAttributions = new String[mMaxEntries];
     private LatLng[] mLikelyPlaceLatLngs = new LatLng[mMaxEntries];
 
+    // Customize toolbar
+    private Toolbar toolbar;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,6 +110,95 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
                 .addApi(Places.PLACE_DETECTION_API)
                 .build();
         mGoogleApiClient.connect();
+
+        // Attaching the layout to the toolbar object
+        // Setting toolbar as the ActionBar with setSupportActionBar() call
+        toolbar = (Toolbar) findViewById(R.id.tool_bar);
+        setSupportActionBar(toolbar);
+
+/*        getSupportActionBar().setHomeButtonEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeAsUpIndicator(R.drawable.common_google_signin_btn_icon_dark);*/
+
+        // Setup side menu navigation
+        setupNavigationMenu();
+    }
+
+    public void setupNavigationMenu() {
+        // Create the AccountHeader
+        AccountHeader headerResult = new AccountHeaderBuilder()
+                .withActivity(this)
+                .withHeaderBackground(R.drawable.city1)
+                .withOnAccountHeaderListener(new AccountHeader.OnAccountHeaderListener() {
+                    @Override
+                    public boolean onProfileChanged(View view, IProfile profile, boolean currentProfile) {
+                        return false;
+                    }
+                })
+                .build();
+
+        // Save instances of items and drawer to apply functionality
+
+        new DrawerBuilder()
+                .withActivity(this)
+                .withTranslucentStatusBar(false)
+                .withActionBarDrawerToggle(false)
+                .addDrawerItems(
+                        //pass your items here
+                )
+                .build();
+
+
+        Drawer result = new DrawerBuilder()
+                .withActivity(this)
+                .withAccountHeader(headerResult)
+                .withTranslucentStatusBar(false)
+                .withActionBarDrawerToggle(false)
+                .addDrawerItems(
+                        new PrimaryDrawerItem().withIdentifier(1).withName("A longer title for this item").withBadge("7").withBadgeStyle(new BadgeStyle().withTextColor(Color.WHITE).withColorRes(R.color.md_red_700)),
+                        new DividerDrawerItem(),
+                        new SecondaryDrawerItem().withIdentifier(2).withName("TITLE 2"),
+                        new SecondaryDrawerItem().withIdentifier(3).withName("TITLE 3"),
+                        new SecondaryDrawerItem().withIdentifier(4).withName("TITLE 4"),
+                        new SecondaryDrawerItem().withIdentifier(5).withName("TITLE 5"),
+                        new SecondaryDrawerItem().withIdentifier(6).withName("TITLE 6")
+                )
+                .build();
+
+        result.addStickyFooterItem(new PrimaryDrawerItem().withName("EcoDriving Inc."));
+
+        /*
+
+        .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
+            @Override
+            public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
+
+                int id = (int) drawerItem.getIdentifier();
+
+                switch (id) {
+                    case 1: Log.v("ID", id + " was chosen");
+                        break;
+                    case 2: Log.v("ID", id + " was chosen");
+                        break;
+                    case 3: Log.v("ID", id + " was chosen");
+                        break;
+                    case 4: Log.v("ID", id + " was chosen");
+                        break;
+                    case 5: Log.v("ID", id + " was chosen");
+                        break;
+                    case 6: Log.v("ID", id + " was chosen");
+                        break;
+                    default:
+                        break;
+                }
+
+                // Close drawer
+
+                return true;
+            }
+        })
+
+         */
     }
 
     /**
@@ -142,6 +245,7 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
 
     /**
      * Sets up the options menu.
+     *
      * @param menu The options menu.
      * @return Boolean.
      */
@@ -153,6 +257,7 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
 
     /**
      * Handles a click on the menu option to get a place.
+     *
      * @param item The menu item to handle.
      * @return Boolean.
      */
@@ -161,6 +266,7 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
         if (item.getItemId() == R.id.option_get_place) {
             showCurrentPlace();
         }
+
         return true;
     }
 
@@ -186,7 +292,7 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
             public View getInfoContents(Marker marker) {
                 // Inflate the layouts for the info window, title and snippet.
                 View infoWindow = getLayoutInflater().inflate(R.layout.custom_info_contents,
-                        (FrameLayout)findViewById(R.id.map), false);
+                        (FrameLayout) findViewById(R.id.map), false);
 
                 TextView title = ((TextView) infoWindow.findViewById(R.id.title));
                 title.setText(marker.getTitle());
