@@ -42,6 +42,7 @@ import com.mikepenz.materialdrawer.holder.BadgeStyle;
 import com.mikepenz.materialdrawer.model.DividerDrawerItem;
 import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
 import com.mikepenz.materialdrawer.model.SecondaryDrawerItem;
+import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IProfile;
 
 /**
@@ -82,8 +83,9 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
     private String[] mLikelyPlaceAttributions = new String[mMaxEntries];
     private LatLng[] mLikelyPlaceLatLngs = new LatLng[mMaxEntries];
 
-    // Customize toolbar
-    private Toolbar toolbar;
+    // Side menu and toolbar customization.
+    private Toolbar mToolbar;
+    private Drawer mDrawer;
 
 
     @Override
@@ -113,14 +115,9 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
 
         // Attaching the layout to the toolbar object
         // Setting toolbar as the ActionBar with setSupportActionBar() call
-        toolbar = (Toolbar) findViewById(R.id.tool_bar);
-        setSupportActionBar(toolbar);
-
-/*        getSupportActionBar().setHomeButtonEnabled(true);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setHomeAsUpIndicator(R.drawable.common_google_signin_btn_icon_dark);*/
-
-        // Setup side menu navigation
+        mToolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(mToolbar);
+        // Setup side menu
         setupNavigationMenu();
     }
 
@@ -137,23 +134,13 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
                 })
                 .build();
 
-        // Save instances of items and drawer to apply functionality
-
-        new DrawerBuilder()
+        // Initialize mDrawer
+        mDrawer = new DrawerBuilder()
                 .withActivity(this)
+                .withDisplayBelowStatusBar(false)
                 .withTranslucentStatusBar(false)
-                .withActionBarDrawerToggle(false)
-                .addDrawerItems(
-                        //pass your items here
-                )
-                .build();
-
-
-        Drawer result = new DrawerBuilder()
-                .withActivity(this)
                 .withAccountHeader(headerResult)
-                .withTranslucentStatusBar(false)
-                .withActionBarDrawerToggle(false)
+                .withDrawerLayout(R.layout.material_drawer_fits_not)
                 .addDrawerItems(
                         new PrimaryDrawerItem().withIdentifier(1).withName("A longer title for this item").withBadge("7").withBadgeStyle(new BadgeStyle().withTextColor(Color.WHITE).withColorRes(R.color.md_red_700)),
                         new DividerDrawerItem(),
@@ -163,42 +150,71 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
                         new SecondaryDrawerItem().withIdentifier(5).withName("TITLE 5"),
                         new SecondaryDrawerItem().withIdentifier(6).withName("TITLE 6")
                 )
+                .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
+                    @Override
+                    public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
+
+                        return true;
+                    }
+                })
+                .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
+                    @Override
+                    public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
+                        int id = (int) drawerItem.getIdentifier();
+                        switch (id) {
+                            case 1: Log.v("ID", id + " was chosen");
+                                break;
+                            case 2: Log.v("ID", id + " was chosen");
+                                break;
+                            case 3: Log.v("ID", id + " was chosen");
+                                break;
+                            case 4: Log.v("ID", id + " was chosen");
+                                break;
+                            case 5: Log.v("ID", id + " was chosen");
+                                break;
+                            case 6: Log.v("ID", id + " was chosen");
+                                break;
+                            default:
+                                break;
+                        }
+
+                        mDrawer.closeDrawer();
+                        return true;
+                    }
+                })
                 .build();
 
-        result.addStickyFooterItem(new PrimaryDrawerItem().withName("EcoDriving Inc."));
+        mDrawer.addStickyFooterItem(new PrimaryDrawerItem().withName("EcoDriving Inc."));
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
+    }
 
-        /*
-
-        .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
-            @Override
-            public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
-
-                int id = (int) drawerItem.getIdentifier();
-
-                switch (id) {
-                    case 1: Log.v("ID", id + " was chosen");
-                        break;
-                    case 2: Log.v("ID", id + " was chosen");
-                        break;
-                    case 3: Log.v("ID", id + " was chosen");
-                        break;
-                    case 4: Log.v("ID", id + " was chosen");
-                        break;
-                    case 5: Log.v("ID", id + " was chosen");
-                        break;
-                    case 6: Log.v("ID", id + " was chosen");
-                        break;
-                    default:
-                        break;
-                }
-
-                // Close drawer
-
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                onBackPressed();
                 return true;
-            }
-        })
+            case R.id.option_get_place:
+                showCurrentPlace();
+                return true;
 
-         */
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (mDrawer.isDrawerOpen()) {
+            mDrawer.closeDrawer();
+        } else {
+            mDrawer.openDrawer();
+        }
+    }
+
+    public void startSession(View view) {
+        Log.v("SESSION", "Start button was clicked");
     }
 
     /**
@@ -243,30 +259,17 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
         Log.d(TAG, "Play services connection suspended");
     }
 
+/*    *//**/
+
     /**
      * Sets up the options menu.
      *
-     * @param menu The options menu.
+     * @param menu The options menu.f
      * @return Boolean.
-     */
+     *//**//**/
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.current_place_menu, menu);
-        return true;
-    }
-
-    /**
-     * Handles a click on the menu option to get a place.
-     *
-     * @param item The menu item to handle.
-     * @return Boolean.
-     */
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.option_get_place) {
-            showCurrentPlace();
-        }
-
         return true;
     }
 
