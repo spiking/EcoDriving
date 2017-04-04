@@ -13,12 +13,11 @@
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
-        <!--              The API key for Google Maps-based APIs. -->
+        <!-- The API key for Google Maps-based APIs. -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
 
-        <activity android:name=".MapsActivityCurrentPlace"></activity>
 
         <activity
             android:name=".SplashScreen"
@@ -29,6 +28,16 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".MapsActivityCurrentPlace" />
+
+        <activity android:name=".NavigationActivity"
+            android:parentActivityName=".MapsActivityCurrentPlace" >
+            <!-- The meta-data tag is required if you support API level 15 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MapsActivityCurrentPlace" />
+        </activity>
+
 
     </application>
 

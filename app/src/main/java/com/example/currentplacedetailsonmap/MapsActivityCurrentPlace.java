@@ -1,6 +1,7 @@
 package com.example.currentplacedetailsonmap;
 
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
@@ -215,6 +216,9 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
 
     public void startSession(View view) {
         Log.v("SESSION", "Start button was clicked");
+
+        Intent intent = new Intent(this, NavigationActivity.class);
+        startActivity(intent);
     }
 
     /**
