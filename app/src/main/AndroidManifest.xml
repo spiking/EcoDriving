@@ -20,7 +20,7 @@
 
 
         <activity
-            android:name=".SplashScreen"
+            android:name=".activities.SplashScreen"
             android:label="@string/title_activity_maps">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -28,13 +28,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".MapsActivityCurrentPlace" />
+        <activity android:name=".activities.MapsActivityCurrentPlace" />
 
-        <activity android:name=".NavigationActivity">
+        <activity android:name=".activities.NavigationActivity">
             <!-- The meta-data tag is required if you support API level 15 and lower -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MapsActivityCurrentPlace" />
+                android:value=".activities.MapsActivityCurrentPlace" />
         </activity>
 
 

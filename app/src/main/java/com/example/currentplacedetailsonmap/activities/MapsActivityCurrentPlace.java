@@ -1,4 +1,4 @@
-package com.example.currentplacedetailsonmap;
+package com.example.currentplacedetailsonmap.activities;
 
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -19,6 +19,7 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
+import com.example.currentplacedetailsonmap.R;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
@@ -229,6 +230,11 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
         if (mMap != null) {
             outState.putParcelable(KEY_CAMERA_POSITION, mMap.getCameraPosition());
             outState.putParcelable(KEY_LOCATION, mLastKnownLocation);
+
+            Log.v("LOCATION", mLastKnownLocation.toString());
+
+
+
             super.onSaveInstanceState(outState);
         }
     }
@@ -375,6 +381,7 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
                     mLocationPermissionGranted = true;
                 }
             }
+
         }
         updateLocationUI();
     }
