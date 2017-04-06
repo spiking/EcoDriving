@@ -18,7 +18,6 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
 
-
         <activity
             android:name=".activities.SplashScreen"
             android:label="@string/title_activity_maps">
@@ -29,15 +28,27 @@
             </intent-filter>
         </activity>
         <activity android:name=".activities.MapsActivityCurrentPlace" />
-
         <activity android:name=".activities.NavigationActivity">
+
             <!-- The meta-data tag is required if you support API level 15 and lower -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".activities.MapsActivityCurrentPlace" />
         </activity>
+        <activity android:name=".activities.SettingsActivity">
 
+            <!-- The meta-data tag is required if you support API level 15 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activities.MapsActivityCurrentPlace" />
+        </activity>
+        <activity android:name=".activities.StatsActivity">
 
+            <!-- The meta-data tag is required if you support API level 15 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activities.MapsActivityCurrentPlace" />
+        </activity>
     </application>
 
 </manifest>

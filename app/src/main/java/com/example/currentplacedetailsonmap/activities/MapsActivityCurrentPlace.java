@@ -144,10 +144,10 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
                 .withAccountHeader(headerResult)
                 .withDrawerLayout(R.layout.material_drawer_fits_not)
                 .addDrawerItems(
-                        new PrimaryDrawerItem().withIdentifier(1).withName("A longer title for this item").withBadge("7").withBadgeStyle(new BadgeStyle().withTextColor(Color.WHITE).withColorRes(R.color.md_red_700)),
+                        new PrimaryDrawerItem().withIdentifier(1).withName("Example@ecodriving.com").withBadge("7").withBadgeStyle(new BadgeStyle().withTextColor(Color.WHITE).withColorRes(R.color.md_red_700)),
                         new DividerDrawerItem(),
-                        new SecondaryDrawerItem().withIdentifier(2).withName("TITLE 2"),
-                        new SecondaryDrawerItem().withIdentifier(3).withName("TITLE 3"),
+                        new SecondaryDrawerItem().withIdentifier(2).withName("Statistics"),
+                        new SecondaryDrawerItem().withIdentifier(3).withName("Settings"),
                         new SecondaryDrawerItem().withIdentifier(4).withName("TITLE 4"),
                         new SecondaryDrawerItem().withIdentifier(5).withName("TITLE 5"),
                         new SecondaryDrawerItem().withIdentifier(6).withName("TITLE 6")
@@ -167,8 +167,10 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
                             case 1: Log.v("ID", id + " was chosen");
                                 break;
                             case 2: Log.v("ID", id + " was chosen");
+                                loadStatsView();
                                 break;
                             case 3: Log.v("ID", id + " was chosen");
+                                loadSettingsView();
                                 break;
                             case 4: Log.v("ID", id + " was chosen");
                                 break;
@@ -189,6 +191,16 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
         mDrawer.addStickyFooterItem(new PrimaryDrawerItem().withName("EcoDriving Inc."));
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
+    }
+
+    public void loadStatsView() {
+        Intent intent = new Intent(this, StatsActivity.class);
+        startActivity(intent);
+    }
+
+    public void loadSettingsView() {
+        Intent intent = new Intent(this, SettingsActivity.class);
+        startActivity(intent);
     }
 
     @Override
