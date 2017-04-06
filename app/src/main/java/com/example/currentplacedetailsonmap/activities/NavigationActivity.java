@@ -37,7 +37,7 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
+        mAccelerometerValues = new float[3];
         initializeSensors();
     }
 
@@ -53,6 +53,7 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
     @Override
     protected void onResume() {
         super.onResume();
+        Log.v("Setup!", "Setup!");
         mSensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_UI); // Initialize accelerometer listener
     }
 
@@ -65,14 +66,24 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
     @Override
     public void onSensorChanged(SensorEvent event) {
 
+        if (event.sensor == mAccelerometer) {
+
+            mAccelerometerValues[0] = event.values[0]; // Acceleration minus Gx on the x-axis
+            mAccelerometerValues[1] = event.values[1]; // Acceleration minus Gy on the y-axis
+            mAccelerometerValues[2] = event.values[2]; // Acceleration minus Gz on the z-axis
+
+            Log.v("Data", Float.toString(mAccelerometerValues[0]));
+            Log.v("Data", Float.toString(mAccelerometerValues[1]));
+            Log.v("Data", Float.toString(mAccelerometerValues[2]));
+        }
     }
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
-
+        // Chill
     }
 
-    public void saveData() {
+    public void saveSession() {
 
         Log.v("DATA", "Save data to internal storage");
 
@@ -80,20 +91,20 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
         startLocation.setLatitude(0.0d);
         startLocation.setLongitude(0.0d);
 
-        Location finishLocation = new Location("");
-        finishLocation.setLatitude(0.0d);
-        finishLocation.setLongitude(0.0d);
+        Location endLocation = new Location("");
+        endLocation.setLatitude(0.0d);
+        endLocation.setLongitude(0.0d);
 
-        float distanceInMeters = finishLocation.distanceTo(startLocation);
+        float distanceInMeters = endLocation.distanceTo(startLocation);
 
         Session session = new Session("123", 0.0f, 0.0f, 0.0f, 0.0f, distanceInMeters, 100);
 
         try {
 
-            // Save the list of entries to internal storage
+            // Save data to internal storage
             DataService.getInstance().writeObject(this, KEY, session);
 
-            // Retrieve the list from internal storage
+            // Retrieve data from internal storage
             Session savedSession = (Session) DataService.getInstance().readObject(this, KEY);
 
             // Print data
