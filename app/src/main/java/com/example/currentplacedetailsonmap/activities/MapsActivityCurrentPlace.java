@@ -1,11 +1,14 @@
 package com.example.currentplacedetailsonmap.activities;
 
+import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.hardware.SensorManager;
 import android.location.Location;
 import android.os.Bundle;
+import android.speech.RecognizerIntent;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -18,6 +21,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.currentplacedetailsonmap.R;
 import com.google.android.gms.common.ConnectionResult;
@@ -36,6 +40,8 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.mikepenz.materialdrawer.AccountHeader;
 import com.mikepenz.materialdrawer.AccountHeaderBuilder;
 import com.mikepenz.materialdrawer.Drawer;
@@ -46,6 +52,11 @@ import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
 import com.mikepenz.materialdrawer.model.SecondaryDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IProfile;
+import com.squareup.seismic.ShakeDetector;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 
 /**
  * An activity that displays a map showing the place at the device's current location.
@@ -54,7 +65,7 @@ import com.mikepenz.materialdrawer.model.interfaces.IProfile;
 public class MapsActivityCurrentPlace extends AppCompatActivity
         implements OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener {
+        GoogleApiClient.OnConnectionFailedListener, ShakeDetector.Listener {
 
     private static final String TAG = MapsActivityCurrentPlace.class.getSimpleName();
     private GoogleMap mMap;
@@ -89,6 +100,13 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
     private Toolbar mToolbar;
     private Drawer mDrawer;
 
+    // Route
+    private List<LatLng> routePoints = new ArrayList<LatLng>();
+
+    // Speech
+    private final int REQ_CODE_SPEECH_INPUT = 100;
+    private SensorManager sensorManager;
+    private ShakeDetector shakeDetector;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -121,6 +139,65 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
         setSupportActionBar(mToolbar);
         // Setup side menu
         setupNavigationMenu();
+
+        // Setup shaking
+        sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+        shakeDetector = new ShakeDetector(this);
+        shakeDetector.start(sensorManager);
+    }
+
+    /**
+    * Shake phone to get speech input
+    * */
+    public void hearShake() {
+        Toast.makeText(this, "You are shaking me, bro!", Toast.LENGTH_SHORT).show();
+        promptSpeechInput();
+    }
+
+    /**
+     * Showing google speech input dialog, shake to show
+     * */
+    private void promptSpeechInput() {
+        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
+        intent.putExtra(RecognizerIntent.EXTRA_PROMPT,
+                getString(R.string.speech_prompt));
+        try {
+            startActivityForResult(intent, REQ_CODE_SPEECH_INPUT);
+     /*       startActivityForResult();*/
+        } catch (ActivityNotFoundException a) {
+            Toast.makeText(getApplicationContext(),
+                    getString(R.string.speech_not_supported),
+                    Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /**
+     * Receiving speech input, say "start" to begin navigation
+     * */
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        switch (requestCode) {
+            case REQ_CODE_SPEECH_INPUT: {
+                if (resultCode == RESULT_OK && null != data) {
+                    ArrayList<String> result = data
+                            .getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+                    if(result.get(0).toString().equals("start")) {
+                        Intent intent = new Intent(this, NavigationActivity.class);
+                        startActivity(intent);
+                    } else {
+                        Toast.makeText(this, "Invalid command!", Toast.LENGTH_SHORT).show();
+                    }
+                }
+                break;
+            }
+
+        }
     }
 
     public void setupNavigationMenu() {
@@ -144,13 +221,10 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
                 .withAccountHeader(headerResult)
                 .withDrawerLayout(R.layout.material_drawer_fits_not)
                 .addDrawerItems(
-                        new PrimaryDrawerItem().withIdentifier(1).withName("Example@ecodriving.com").withBadge("7").withBadgeStyle(new BadgeStyle().withTextColor(Color.WHITE).withColorRes(R.color.md_red_700)),
+                        new PrimaryDrawerItem().withIdentifier(1).withName("Example@ecodriving.com").withBadge("1").withBadgeStyle(new BadgeStyle().withTextColor(Color.WHITE).withColorRes(R.color.md_red_700)),
                         new DividerDrawerItem(),
                         new SecondaryDrawerItem().withIdentifier(2).withName("Statistics"),
-                        new SecondaryDrawerItem().withIdentifier(3).withName("Settings"),
-                        new SecondaryDrawerItem().withIdentifier(4).withName("TITLE 4"),
-                        new SecondaryDrawerItem().withIdentifier(5).withName("TITLE 5"),
-                        new SecondaryDrawerItem().withIdentifier(6).withName("TITLE 6")
+                        new SecondaryDrawerItem().withIdentifier(3).withName("Settings")
                 )
                 .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
                     @Override
@@ -164,19 +238,12 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
                     public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
                         int id = (int) drawerItem.getIdentifier();
                         switch (id) {
-                            case 1: Log.v("ID", id + " was chosen");
+                            case 1:
+                                Log.v("ID", id + " was chosen");
                                 break;
-                            case 2: Log.v("ID", id + " was chosen");
+                            case 2:
+                                Log.v("ID", id + " was chosen");
                                 loadStatsView();
-                                break;
-                            case 3: Log.v("ID", id + " was chosen");
-                                loadSettingsView();
-                                break;
-                            case 4: Log.v("ID", id + " was chosen");
-                                break;
-                            case 5: Log.v("ID", id + " was chosen");
-                                break;
-                            case 6: Log.v("ID", id + " was chosen");
                                 break;
                             default:
                                 break;
@@ -203,6 +270,13 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
         startActivity(intent);
     }
 
+    public void startSession(View view) {
+        Log.v("SESSION", "Start button was clicked");
+
+        Intent intent = new Intent(this, NavigationActivity.class);
+        startActivity(intent);
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -212,7 +286,6 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
             case R.id.option_get_place:
                 showCurrentPlace();
                 return true;
-
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -227,13 +300,6 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
         }
     }
 
-    public void startSession(View view) {
-        Log.v("SESSION", "Start button was clicked");
-
-        Intent intent = new Intent(this, NavigationActivity.class);
-        startActivity(intent);
-    }
-
     /**
      * Saves the state of the map when the activity is paused.
      */
@@ -242,11 +308,7 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
         if (mMap != null) {
             outState.putParcelable(KEY_CAMERA_POSITION, mMap.getCameraPosition());
             outState.putParcelable(KEY_LOCATION, mLastKnownLocation);
-
             Log.v("LOCATION", mLastKnownLocation.toString());
-
-
-
             super.onSaveInstanceState(outState);
         }
     }
@@ -302,6 +364,19 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
     @Override
     public void onMapReady(GoogleMap map) {
         mMap = map;
+        // map is a GoogleMap object
+
+
+        if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
+                android.Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            mLocationPermissionGranted = true;
+            mMap.setMyLocationEnabled(true);
+        } else {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
+                    PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+        }
 
         // Use a custom info window adapter to handle multiple lines of text in the
         // info window contents.
@@ -334,12 +409,14 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
 
         // Get the current location of the device and set the position of the map.
         getDeviceLocation();
+
     }
 
     /**
      * Gets the current location of the device, and positions the map's camera.
      */
     private void getDeviceLocation() {
+
         /*
          * Request location permission, so that we can get the location of the
          * device. The result of the permission request is handled by a callback,
@@ -361,6 +438,10 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
         if (mLocationPermissionGranted) {
             mLastKnownLocation = LocationServices.FusedLocationApi
                     .getLastLocation(mGoogleApiClient);
+            System.out.println("Last known position updated, add to route!");
+            LatLng location = new LatLng(mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude());
+            routePoints.add(location);
+            // addExampleRoute();
         }
 
         // Set the map's camera position to the current location of the device.
@@ -375,6 +456,21 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mDefaultLocation, DEFAULT_ZOOM));
             mMap.getUiSettings().setMyLocationButtonEnabled(false);
         }
+    }
+
+    public void addExampleRoute() {
+
+        LatLng l1 = new LatLng(58.283489, 12.285821);
+        LatLng l2 = new LatLng(58.379728, 12.324803);
+        routePoints.add(l1);
+        routePoints.add(l2);
+
+        Polyline route = mMap.addPolyline(new PolylineOptions()
+                .geodesic(true));
+        route.setPoints(routePoints);
+
+        System.out.println("SET POINTS");
+
     }
 
     /**
@@ -491,6 +587,8 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
      */
     private void updateLocationUI() {
 
+        System.out.println("UPDATE LOCATION UI");
+
         if (mMap == null) {
             return;
         }
@@ -504,20 +602,24 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
         if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
                 android.Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
+            System.out.println("Permission granted!");
             mLocationPermissionGranted = true;
         } else {
             ActivityCompat.requestPermissions(this,
                     new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
                     PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+            System.out.println("Permission NOT granted!");
         }
 
         if (mLocationPermissionGranted) {
             mMap.setMyLocationEnabled(true);
             mMap.getUiSettings().setMyLocationButtonEnabled(true);
+            System.out.println("Add Icon!!");
         } else {
             mMap.setMyLocationEnabled(false);
             mMap.getUiSettings().setMyLocationButtonEnabled(false);
             mLastKnownLocation = null;
+            System.out.println("Do NOT add icon");
         }
     }
 }

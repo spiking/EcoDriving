@@ -8,15 +8,15 @@ import java.io.Serializable;
 
 public class Session implements Serializable {
 
-    private String id;
-    private float startLatitude;
-    private float startLongitude;
-    private float endLatitude;
-    private float endLongitude;
-    private float distance;
+    private int id;
+    private double startLatitude;
+    private double startLongitude;
+    private double endLatitude;
+    private double endLongitude;
+    private double distance;
     private int score;
 
-    public Session(String id, float startLatitude, float startLongitude, float endLatitude, float endLongitude, float distance, int score) {
+    public Session(int id, double startLatitude, double startLongitude, double endLatitude, double endLongitude, double distance, int score) {
         this.id = id;
         this.startLatitude = startLatitude;
         this.startLongitude = startLongitude;

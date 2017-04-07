@@ -39,6 +39,8 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         mAccelerometerValues = new float[3];
         initializeSensors();
+
+        saveSession();
     }
 
     public void initializeSensors() {
@@ -72,9 +74,9 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
             mAccelerometerValues[1] = event.values[1]; // Acceleration minus Gy on the y-axis
             mAccelerometerValues[2] = event.values[2]; // Acceleration minus Gz on the z-axis
 
-            Log.v("Data", Float.toString(mAccelerometerValues[0]));
+/*            Log.v("Data", Float.toString(mAccelerometerValues[0]));
             Log.v("Data", Float.toString(mAccelerometerValues[1]));
-            Log.v("Data", Float.toString(mAccelerometerValues[2]));
+            Log.v("Data", Float.toString(mAccelerometerValues[2]));*/
         }
     }
 
@@ -87,22 +89,23 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
 
         Log.v("DATA", "Save data to internal storage");
 
-        Location startLocation = new Location("");
-        startLocation.setLatitude(0.0d);
-        startLocation.setLongitude(0.0d);
+        Location startLocation = new Location("VBG");
+        startLocation.setLatitude(58.36014);
+        startLocation.setLongitude(12.344412);
 
-        Location endLocation = new Location("");
-        endLocation.setLatitude(0.0d);
-        endLocation.setLongitude(0.0d);
+        Location endLocation = new Location("THN");
+        endLocation.setLatitude(58.283489);
+        endLocation.setLongitude(12.285821);
 
         float distanceInMeters = endLocation.distanceTo(startLocation);
+        System.out.println(distanceInMeters);
 
-        Session session = new Session("123", 0.0f, 0.0f, 0.0f, 0.0f, distanceInMeters, 100);
+        Session session = new Session(1, 58.36014, 12.344412, 58.283489, 12.285821, distanceInMeters, 10);
 
         try {
 
             // Save data to internal storage
-            DataService.getInstance().writeObject(this, KEY, session);
+/*            DataService.getInstance().writeObject(this, KEY, session);*/
 
             // Retrieve data from internal storage
             Session savedSession = (Session) DataService.getInstance().readObject(this, KEY);
