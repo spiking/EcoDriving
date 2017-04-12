@@ -10,6 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
+import android.widget.TextView;
 
 import com.example.currentplacedetailsonmap.R;
 import com.example.currentplacedetailsonmap.models.Session;
@@ -29,6 +30,9 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
     private Sensor mAccelerometer;
     private float[] mAccelerometerValues;
 
+    //TextView
+    private TextView acceleration;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,12 +44,16 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
         mAccelerometerValues = new float[3];
         initializeSensors();
 
+        //creates the textview which will display the acceleration on the screen
+        acceleration=(TextView)findViewById(R.id.acceleration);
+
         saveSession();
     }
 
     public void initializeSensors() {
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        mSensorManager.registerListener(this,mAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
     }
 
     public void stopSession(View view) {
@@ -74,6 +82,7 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
             mAccelerometerValues[1] = event.values[1]; // Acceleration minus Gy on the y-axis
             mAccelerometerValues[2] = event.values[2]; // Acceleration minus Gz on the z-axis
 
+            acceleration.setText("X: "+event.values[0]+"\nY: "+event.values[1]+"\nZ: "+event.values[2]);
 /*            Log.v("Data", Float.toString(mAccelerometerValues[0]));
             Log.v("Data", Float.toString(mAccelerometerValues[1]));
             Log.v("Data", Float.toString(mAccelerometerValues[2]));*/

@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/CurrentPlaceDetailsOnMap.iml" filepath="$PROJECT_DIR$/CurrentPlaceDetailsOnMap.iml" />
+      <module fileurl="file://$PROJECT_DIR$/EcoDriving.iml" filepath="$PROJECT_DIR$/EcoDriving.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
   </component>
