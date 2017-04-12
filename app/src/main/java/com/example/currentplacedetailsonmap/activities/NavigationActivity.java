@@ -1,5 +1,6 @@
 package com.example.currentplacedetailsonmap.activities;
 
+import android.graphics.Color;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -19,6 +20,7 @@ import com.example.currentplacedetailsonmap.services.DataService;
 import java.io.IOException;
 
 import static android.provider.Contacts.SettingsColumns.KEY;
+import static java.lang.Math.abs;
 
 public class NavigationActivity extends AppCompatActivity implements SensorEventListener {
 
@@ -77,13 +79,26 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
     public void onSensorChanged(SensorEvent event) {
 
         if (event.sensor == mAccelerometer) {
-
             mAccelerometerValues[0] = event.values[0]; // Acceleration minus Gx on the x-axis
             mAccelerometerValues[1] = event.values[1]; // Acceleration minus Gy on the y-axis
             mAccelerometerValues[2] = event.values[2]; // Acceleration minus Gz on the z-axis
 
-            acceleration.setText("X: "+event.values[0]+"\nY: "+event.values[1]+"\nZ: "+event.values[2]);
-/*            Log.v("Data", Float.toString(mAccelerometerValues[0]));
+            //Simplified total acceleration
+            float totalAcc = event.values[0]+event.values[1]+event.values[2];
+
+
+
+            if(abs(totalAcc)>15){
+                findViewById(R.id.navigation_layout).setBackgroundColor(Color.RED);
+                acceleration.setText("BAD! \n Acceleration: "+ Float.toString(totalAcc));
+            }else{
+                findViewById(R.id.navigation_layout).setBackgroundColor(Color.GREEN);
+                acceleration.setText("GOOD! \n Acceleration: "+ Float.toString(totalAcc));
+            }
+
+            //acceleration.setText("X: "+event.values[0]+"\nY: "+event.values[1]+"\nZ: "+event.values[2]);
+
+            /*          Log.v("Data", Float.toString(mAccelerometerValues[0]));
             Log.v("Data", Float.toString(mAccelerometerValues[1]));
             Log.v("Data", Float.toString(mAccelerometerValues[2]));*/
         }

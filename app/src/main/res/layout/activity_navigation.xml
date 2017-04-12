@@ -5,7 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#FFFFFFFF"
-    tools:context="com.example.currentplacedetailsonmap.activities.NavigationActivity">
+    tools:context="com.example.currentplacedetailsonmap.activities.NavigationActivity"
+    android:id="@+id/navigation_layout">
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/toolbar"
@@ -39,7 +40,10 @@
         android:layout_height="wrap_content"
         android:id="@+id/acceleration"
         android:text="Acceleration: 0"
-        android:textColor="#ff0000"
+        android:textColor="#696969"
+        android:textStyle="bold"
+        android:textSize="24sp"
+        android:gravity="center"
         app:layout_constraintTop_toTopOf="parent"
         android:layout_marginTop="8dp"
         android:layout_marginRight="8dp"
