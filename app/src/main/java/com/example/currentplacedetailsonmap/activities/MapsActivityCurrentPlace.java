@@ -105,8 +105,9 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
 
     // Speech
     private final int REQ_CODE_SPEECH_INPUT = 100;
-    private SensorManager sensorManager;
+    private SensorManager mSensorManager;
     private ShakeDetector shakeDetector;
+    private static boolean mMapActivityShowing = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -141,14 +142,15 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
         setupNavigationMenu();
 
         // Setup shaking
-        sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+        mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         shakeDetector = new ShakeDetector(this);
-        shakeDetector.start(sensorManager);
+        shakeDetector.start(mSensorManager);
+
     }
 
     /**
-    * Shake phone to get speech input
-    * */
+     * Shake phone to get speech input
+     */
     public void hearShake() {
         Toast.makeText(this, "You are shaking me, bro!", Toast.LENGTH_SHORT).show();
         promptSpeechInput();
@@ -156,7 +158,7 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
 
     /**
      * Showing google speech input dialog, shake to show
-     * */
+     */
     private void promptSpeechInput() {
         Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
@@ -164,9 +166,13 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
         intent.putExtra(RecognizerIntent.EXTRA_PROMPT,
                 getString(R.string.speech_prompt));
+
+        if (!mMapActivityShowing) {
+            return;
+        }
+
         try {
             startActivityForResult(intent, REQ_CODE_SPEECH_INPUT);
-     /*       startActivityForResult();*/
         } catch (ActivityNotFoundException a) {
             Toast.makeText(getApplicationContext(),
                     getString(R.string.speech_not_supported),
@@ -176,7 +182,7 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
 
     /**
      * Receiving speech input, say "start" to begin navigation
-     * */
+     */
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -187,7 +193,7 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
                 if (resultCode == RESULT_OK && null != data) {
                     ArrayList<String> result = data
                             .getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-                    if(result.get(0).toString().equals("start")) {
+                    if (result.get(0).toString().equals("start")) {
                         Intent intent = new Intent(this, NavigationActivity.class);
                         startActivity(intent);
                     } else {
@@ -245,6 +251,10 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
                                 Log.v("ID", id + " was chosen");
                                 loadStatsView();
                                 break;
+                            case 3:
+                                Log.v("ID", id + " was chosen");
+                                loadSettingsView();
+                                break;
                             default:
                                 break;
                         }
@@ -275,6 +285,27 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
 
         Intent intent = new Intent(this, NavigationActivity.class);
         startActivity(intent);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.v("HEJ", "TRUE!");
+        mMapActivityShowing = true;
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        Log.v("HEJ", "FALSE!");
+        mMapActivityShowing = false;
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        Log.v("HEJ", "FALSE!");
+        mMapActivityShowing = false;
     }
 
     @Override

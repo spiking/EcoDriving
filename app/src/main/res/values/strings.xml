@@ -15,4 +15,6 @@
     <string name="tap_on_mic">Tap on mic to speak</string>
     <string name="stats_title">Fabulous Stats</string>
     <string name="settings_title">Fabulous Settings</string>
+    <string name="navigation_feedback">Welcome</string>
+    <string name="navigation_acceleration_value">Acceleration: 0</string>
 </resources>

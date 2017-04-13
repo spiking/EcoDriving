@@ -18,9 +18,10 @@ import com.example.currentplacedetailsonmap.models.Session;
 import com.example.currentplacedetailsonmap.services.DataService;
 
 import java.io.IOException;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import static android.provider.Contacts.SettingsColumns.KEY;
-import static java.lang.Math.abs;
 
 public class NavigationActivity extends AppCompatActivity implements SensorEventListener {
 
@@ -29,11 +30,15 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
 
     // Sensors
     private SensorManager mSensorManager;
-    private Sensor mAccelerometer;
-    private float[] mAccelerometerValues;
+    private Sensor mLinearAccelerometer;
+    private float[] mLinearAccelerationValues;
+    private Timer mTimer;
+    private float mAccelerationValue;
 
     //TextView
-    private TextView acceleration;
+    private TextView mAccelerationValueTextView;
+    private TextView mAccelerationFeedbackTextView;
+    private int mCounter = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,19 +48,67 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        mAccelerometerValues = new float[3];
+
+        mLinearAccelerationValues = new float[3];
+        mAccelerationValue = 0;
+
         initializeSensors();
 
-        //creates the textview which will display the acceleration on the screen
-        acceleration=(TextView)findViewById(R.id.acceleration);
+        mAccelerationValueTextView = (TextView) findViewById(R.id.navigation_acceleration_value);
+        mAccelerationFeedbackTextView = (TextView) findViewById(R.id.navigation_feedback);
 
-        saveSession();
+        mTimer = new Timer();
+        startUITimer();
+
     }
+
+    public void startUITimer() {
+        mTimer.scheduleAtFixedRate(new TimerTask() {
+            public void run() {
+                updateUI();
+            }
+        }, 0, 500);
+    }
+
+    // This method is called directly by the timer, thus it runs on a sub thread
+    // Call The runOnUIThread via runnable to be able to update UI elements
+
+    public void updateUI() {
+        this.runOnUiThread(RunnableUpdateUI);
+    }
+
+    public Runnable RunnableUpdateUI = new Runnable() {
+        @Override
+        public void run() {
+
+            Log.v("Counter", "RUNNING! " + mCounter++);
+
+            if (mAccelerationValue > 2.5) {
+                mAccelerationValueTextView.setTextColor(Color.WHITE);
+                mAccelerationFeedbackTextView.setTextColor(Color.WHITE);
+                findViewById(R.id.navigation_layout).setBackgroundColor(Color.RED);
+                mAccelerationFeedbackTextView.setText("BAD!");
+                mAccelerationValueTextView.setText(Float.toString(mAccelerationValue));
+            } else if (mAccelerationValue > 1.5) {
+                mAccelerationValueTextView.setTextColor(Color.DKGRAY);
+                mAccelerationFeedbackTextView.setTextColor(Color.DKGRAY);
+                findViewById(R.id.navigation_layout).setBackgroundColor(Color.LTGRAY);
+                mAccelerationFeedbackTextView.setText("OKEY!");
+                mAccelerationValueTextView.setText(Float.toString(mAccelerationValue));
+            } else {
+                mAccelerationValueTextView.setTextColor(Color.DKGRAY);
+                mAccelerationFeedbackTextView.setTextColor(Color.DKGRAY);
+                findViewById(R.id.navigation_layout).setBackgroundColor(Color.GREEN);
+                mAccelerationFeedbackTextView.setText("GREAT!");
+                mAccelerationValueTextView.setText(Float.toString(mAccelerationValue));
+            }
+        }
+    };
 
     public void initializeSensors() {
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-        mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        mSensorManager.registerListener(this,mAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+        mLinearAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
+        mSensorManager.registerListener(this, mLinearAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
     }
 
     public void stopSession(View view) {
@@ -65,8 +118,7 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
     @Override
     protected void onResume() {
         super.onResume();
-        Log.v("Setup!", "Setup!");
-        mSensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_UI); // Initialize accelerometer listener
+        mSensorManager.registerListener(this, mLinearAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
     }
 
     @Override
@@ -78,29 +130,20 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
     @Override
     public void onSensorChanged(SensorEvent event) {
 
-        if (event.sensor == mAccelerometer) {
-            mAccelerometerValues[0] = event.values[0]; // Acceleration minus Gx on the x-axis
-            mAccelerometerValues[1] = event.values[1]; // Acceleration minus Gy on the y-axis
-            mAccelerometerValues[2] = event.values[2]; // Acceleration minus Gz on the z-axis
+        // Basically a HighPass-filter
+        // Acceleration = gravity + linear acceleration <=> linear acceleration = acceleration - gravity
 
-            //Simplified total acceleration
-            float totalAcc = event.values[0]+event.values[1]+event.values[2];
+        if (event.sensor == mLinearAccelerometer) {
+            mLinearAccelerationValues[0] = event.values[0]; // x-value
+            mLinearAccelerationValues[1] = event.values[1]; // y-value
+            mLinearAccelerationValues[2] = event.values[2]; // x-value
 
+            Log.v("Linear Acceleration X: ", Float.toString(mLinearAccelerationValues[0]));
+            Log.v("Linear Acceleration Y: ", Float.toString(mLinearAccelerationValues[1]));
+            Log.v("Linear Acceleration Z: ", Float.toString(mLinearAccelerationValues[2])); // Only using Z-value atm
 
+            mAccelerationValue = Math.abs(event.values[2]);
 
-            if(abs(totalAcc)>15){
-                findViewById(R.id.navigation_layout).setBackgroundColor(Color.RED);
-                acceleration.setText("BAD! \n Acceleration: "+ Float.toString(totalAcc));
-            }else{
-                findViewById(R.id.navigation_layout).setBackgroundColor(Color.GREEN);
-                acceleration.setText("GOOD! \n Acceleration: "+ Float.toString(totalAcc));
-            }
-
-            //acceleration.setText("X: "+event.values[0]+"\nY: "+event.values[1]+"\nZ: "+event.values[2]);
-
-            /*          Log.v("Data", Float.toString(mAccelerometerValues[0]));
-            Log.v("Data", Float.toString(mAccelerometerValues[1]));
-            Log.v("Data", Float.toString(mAccelerometerValues[2]));*/
         }
     }
 
@@ -109,9 +152,9 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
         // Chill
     }
 
-    public void saveSession() {
+    // Not in use
 
-        Log.v("DATA", "Save data to internal storage");
+    public void saveSession() {
 
         Location startLocation = new Location("VBG");
         startLocation.setLatitude(58.36014);
@@ -129,7 +172,7 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
         try {
 
             // Save data to internal storage
-/*            DataService.getInstance().writeObject(this, KEY, session);*/
+            DataService.getInstance().writeObject(this, KEY, session);
 
             // Retrieve data from internal storage
             Session savedSession = (Session) DataService.getInstance().readObject(this, KEY);
