@@ -138,11 +138,13 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
             mLinearAccelerationValues[1] = event.values[1]; // y-value
             mLinearAccelerationValues[2] = event.values[2]; // x-value
 
-            Log.v("Linear Acceleration X: ", Float.toString(mLinearAccelerationValues[0]));
+/*            Log.v("Linear Acceleration X: ", Float.toString(mLinearAccelerationValues[0]));
             Log.v("Linear Acceleration Y: ", Float.toString(mLinearAccelerationValues[1]));
-            Log.v("Linear Acceleration Z: ", Float.toString(mLinearAccelerationValues[2])); // Only using Z-value atm
+            Log.v("Linear Acceleration Z: ", Float.toString(mLinearAccelerationValues[2]));*/
 
-            mAccelerationValue = Math.abs(event.values[2]);
+            mAccelerationValue = Math.abs(event.values[0] + event.values[1] + event.values[2]);
+
+            Log.v("Acceleration total: ", Float.toString(mAccelerationValue));
 
         }
     }
