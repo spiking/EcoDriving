@@ -9,7 +9,8 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/MaterialDrawerTheme">
+        android:theme="@style/MaterialDrawerTheme"
+        android:name="com.example.currentplacedetailsonmap.services.ApplicationContext">
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
@@ -49,6 +50,14 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".activities.MapsActivityCurrentPlace" />
         </activity>
+        <activity android:name=".activities.DetailedStatsActivity">
+
+            <!-- The meta-data tag is required if you support API level 15 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activities.StatsActivity" />
+        </activity>
+
     </application>
 
 </manifest>

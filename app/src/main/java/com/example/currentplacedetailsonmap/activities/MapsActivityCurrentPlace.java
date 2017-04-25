@@ -24,6 +24,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.currentplacedetailsonmap.R;
+import com.example.currentplacedetailsonmap.services.DataService;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
@@ -54,6 +55,7 @@ import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IProfile;
 import com.squareup.seismic.ShakeDetector;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -146,6 +148,15 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
         shakeDetector = new ShakeDetector(this);
         shakeDetector.start(mSensorManager);
 
+        // Load cached data into temporary storage
+
+        try {
+            DataService.getInstance().readSessionsFromDatabase("DATABASE");
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -645,12 +656,10 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
         if (mLocationPermissionGranted) {
             mMap.setMyLocationEnabled(true);
             mMap.getUiSettings().setMyLocationButtonEnabled(true);
-            System.out.println("Add Icon!!");
         } else {
             mMap.setMyLocationEnabled(false);
             mMap.getUiSettings().setMyLocationButtonEnabled(false);
             mLastKnownLocation = null;
-            System.out.println("Do NOT add icon");
         }
     }
 }

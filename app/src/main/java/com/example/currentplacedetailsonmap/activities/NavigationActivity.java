@@ -18,10 +18,10 @@ import com.example.currentplacedetailsonmap.models.Session;
 import com.example.currentplacedetailsonmap.services.DataService;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Timer;
 import java.util.TimerTask;
-
-import static android.provider.Contacts.SettingsColumns.KEY;
 
 public class NavigationActivity extends AppCompatActivity implements SensorEventListener {
 
@@ -39,6 +39,11 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
     private TextView mAccelerationValueTextView;
     private TextView mAccelerationFeedbackTextView;
     private int mCounter = 0;
+
+    // Values
+    private int mBadCount;
+    private int mOkCount;
+    private int mGoodCount;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,6 +65,16 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
         mTimer = new Timer();
         startUITimer();
 
+        resetCounts();
+
+        mBadCount = 0;
+        mOkCount = 0;
+        mGoodCount = 0;
+
+    }
+
+    public void resetCounts() {
+        mBadCount = mOkCount = mGoodCount = 0;
     }
 
     public void startUITimer() {
@@ -89,18 +104,21 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
                 findViewById(R.id.navigation_layout).setBackgroundColor(Color.RED);
                 mAccelerationFeedbackTextView.setText("BAD!");
                 mAccelerationValueTextView.setText(Float.toString(mAccelerationValue));
+                mBadCount++;
             } else if (mAccelerationValue > 1.5) {
                 mAccelerationValueTextView.setTextColor(Color.DKGRAY);
                 mAccelerationFeedbackTextView.setTextColor(Color.DKGRAY);
                 findViewById(R.id.navigation_layout).setBackgroundColor(Color.LTGRAY);
                 mAccelerationFeedbackTextView.setText("OKEY!");
                 mAccelerationValueTextView.setText(Float.toString(mAccelerationValue));
+                mOkCount++;
             } else {
                 mAccelerationValueTextView.setTextColor(Color.DKGRAY);
                 mAccelerationFeedbackTextView.setTextColor(Color.DKGRAY);
                 findViewById(R.id.navigation_layout).setBackgroundColor(Color.GREEN);
                 mAccelerationFeedbackTextView.setText("GREAT!");
                 mAccelerationValueTextView.setText(Float.toString(mAccelerationValue));
+                mGoodCount++;
             }
         }
     };
@@ -113,6 +131,7 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
 
     public void stopSession(View view) {
         Log.v("STOP", "Stop session!");
+        saveSession();
     }
 
     @Override
@@ -138,10 +157,6 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
             mLinearAccelerationValues[1] = event.values[1]; // y-value
             mLinearAccelerationValues[2] = event.values[2]; // x-value
 
-/*            Log.v("Linear Acceleration X: ", Float.toString(mLinearAccelerationValues[0]));
-            Log.v("Linear Acceleration Y: ", Float.toString(mLinearAccelerationValues[1]));
-            Log.v("Linear Acceleration Z: ", Float.toString(mLinearAccelerationValues[2]));*/
-
             mAccelerationValue = Math.abs(event.values[0] + event.values[1] + event.values[2]);
 
             Log.v("Acceleration total: ", Float.toString(mAccelerationValue));
@@ -154,7 +169,6 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
         // Chill
     }
 
-    // Not in use
 
     public void saveSession() {
 
@@ -167,25 +181,24 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
         endLocation.setLongitude(12.285821);
 
         float distanceInMeters = endLocation.distanceTo(startLocation);
-        System.out.println(distanceInMeters);
+        int mTotalCount = mBadCount + mOkCount + mGoodCount;
 
-        Session session = new Session(1, 58.36014, 12.344412, 58.283489, 12.285821, distanceInMeters, 10);
+        Calendar calender = Calendar.getInstance();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String stringDate = sdf.format(calender.getTime());
+
+        Session session = new Session(0, 58.36014, 12.344412, 58.283489, 12.285821, distanceInMeters, mTotalCount, mBadCount, mOkCount, mGoodCount, stringDate);
 
         try {
-
-            // Save data to internal storage
-            DataService.getInstance().writeObject(this, KEY, session);
-
-            // Retrieve data from internal storage
-            Session savedSession = (Session) DataService.getInstance().readObject(this, KEY);
-
-            // Print data
-            Log.v("DATA", savedSession.toString());
-
+            // Save current session to sessions
+            DataService.getInstance().writeSessionToSessions(session);
+            // Save all sesions to internal storage
+            DataService.getInstance().writeSessionsToDatabase("DATABASE");
         } catch (IOException e) {
             e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
         }
+
+        resetCounts();
+        mTimer.cancel();
     }
 }
