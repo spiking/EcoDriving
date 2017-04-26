@@ -163,7 +163,7 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
      * Shake phone to get speech input
      */
     public void hearShake() {
-        Toast.makeText(this, "You are shaking me, bro!", Toast.LENGTH_SHORT).show();
+        /*Toast.makeText(this, "You are shaking me, bro!", Toast.LENGTH_SHORT).show();*/
         promptSpeechInput();
     }
 
@@ -204,7 +204,7 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
                 if (resultCode == RESULT_OK && null != data) {
                     ArrayList<String> result = data
                             .getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-                    if (result.get(0).toString().equals("start")) {
+                    if (result.get(0).toString().equalsIgnoreCase("start")) {
                         Intent intent = new Intent(this, NavigationActivity.class);
                         startActivity(intent);
                     } else {
@@ -301,21 +301,18 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
     @Override
     public void onResume() {
         super.onResume();
-        Log.v("HEJ", "TRUE!");
         mMapActivityShowing = true;
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        Log.v("HEJ", "FALSE!");
         mMapActivityShowing = false;
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        Log.v("HEJ", "FALSE!");
         mMapActivityShowing = false;
     }
 

@@ -1,12 +1,14 @@
 package com.example.currentplacedetailsonmap.models;
 
+import android.support.annotation.NonNull;
+
 import java.io.Serializable;
 
 /**
  * Created by Atlas on 2017-04-05.
  */
 
-public class Session implements Serializable {
+public class Session implements Serializable, Comparable {
 
     private int id;
     private double startLatitude;
@@ -46,5 +48,14 @@ public class Session implements Serializable {
 
     public String getDate() {
         return date;
+    }
+
+
+    @Override
+    public int compareTo(@NonNull Object o) {
+        if(o instanceof Session) {
+            return date.compareTo(((Session) o).getDate());
+        }
+        return 0;
     }
 }

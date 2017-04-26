@@ -1,5 +1,7 @@
 package com.example.currentplacedetailsonmap.activities;
 
+import android.content.ActivityNotFoundException;
+import android.content.Intent;
 import android.graphics.Color;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -7,23 +9,29 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.location.Location;
 import android.os.Bundle;
+import android.speech.RecognizerIntent;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.currentplacedetailsonmap.R;
 import com.example.currentplacedetailsonmap.models.Session;
 import com.example.currentplacedetailsonmap.services.DataService;
+import com.squareup.seismic.ShakeDetector;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class NavigationActivity extends AppCompatActivity implements SensorEventListener {
+public class NavigationActivity extends AppCompatActivity implements SensorEventListener, ShakeDetector.Listener {
 
     // Side menu and toolbar customization.
     private Toolbar mToolbar;
@@ -38,12 +46,20 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
     //TextView
     private TextView mAccelerationValueTextView;
     private TextView mAccelerationFeedbackTextView;
-    private int mCounter = 0;
+    private static int mCounter = 0;
+
+    //Button
+    private Button mStopButton;
 
     // Values
     private int mBadCount;
     private int mOkCount;
     private int mGoodCount;
+
+    // Speech
+    private final int REQ_CODE_SPEECH_INPUT = 100;
+    private ShakeDetector shakeDetector;
+    private static boolean mMapActivityShowing = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +69,8 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        mStopButton = (Button) findViewById(R.id.stop_button);
 
         mLinearAccelerationValues = new float[3];
         mAccelerationValue = 0;
@@ -67,15 +85,17 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
 
         resetCounts();
 
-        mBadCount = 0;
-        mOkCount = 0;
-        mGoodCount = 0;
+        // Setup shaking
+        mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+        shakeDetector = new ShakeDetector(this);
+        shakeDetector.start(mSensorManager);
 
     }
 
     public void resetCounts() {
-        mBadCount = mOkCount = mGoodCount = 0;
+        mBadCount = mOkCount = mGoodCount = mCounter = 0;
     }
+
 
     public void startUITimer() {
         mTimer.scheduleAtFixedRate(new TimerTask() {
@@ -116,7 +136,7 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
                 mAccelerationValueTextView.setTextColor(Color.DKGRAY);
                 mAccelerationFeedbackTextView.setTextColor(Color.DKGRAY);
                 findViewById(R.id.navigation_layout).setBackgroundColor(Color.GREEN);
-                mAccelerationFeedbackTextView.setText("GREAT!");
+                mAccelerationFeedbackTextView.setText("GOOD!");
                 mAccelerationValueTextView.setText(Float.toString(mAccelerationValue));
                 mGoodCount++;
             }
@@ -159,7 +179,7 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
 
             mAccelerationValue = Math.abs(event.values[0] + event.values[1] + event.values[2]);
 
-            Log.v("Acceleration total: ", Float.toString(mAccelerationValue));
+            /*Log.v("Acceleration total: ", Float.toString(mAccelerationValue));*/
 
         }
     }
@@ -171,6 +191,8 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
 
 
     public void saveSession() {
+
+        // Mostly random data atm
 
         Location startLocation = new Location("VBG");
         startLocation.setLatitude(58.36014);
@@ -200,5 +222,60 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
 
         resetCounts();
         mTimer.cancel();
+    }
+
+    /**
+     * Shake phone to get speech input
+     */
+    public void hearShake() {
+        promptSpeechInput();
+    }
+
+    /**
+     * Showing google speech input dialog, shake to show
+     */
+    private void promptSpeechInput() {
+        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
+        intent.putExtra(RecognizerIntent.EXTRA_PROMPT,
+                getString(R.string.speech_prompt));
+
+        try {
+            startActivityForResult(intent, REQ_CODE_SPEECH_INPUT);
+        } catch (ActivityNotFoundException a) {
+            Toast.makeText(getApplicationContext(),
+                    getString(R.string.speech_not_supported),
+                    Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /**
+     * Receiving speech input, say "stop" stop navigation
+     */
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        switch (requestCode) {
+            case REQ_CODE_SPEECH_INPUT: {
+                if (resultCode == RESULT_OK && null != data) {
+                    ArrayList<String> result = data
+                            .getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+
+                    System.out.println(result.get(0).toString());
+
+                    if (result.get(0).toString().equalsIgnoreCase("stopp")) {
+                        mStopButton.performClick();
+                    } else {
+                       Toast.makeText(this, "Invalid command!", Toast.LENGTH_SHORT).show();
+                    }
+                }
+                break;
+            }
+
+        }
     }
 }
