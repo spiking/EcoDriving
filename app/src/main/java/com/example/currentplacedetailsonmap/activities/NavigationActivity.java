@@ -121,21 +121,21 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
             if (mAccelerationValue > 2.5) {
                 mAccelerationValueTextView.setTextColor(Color.WHITE);
                 mAccelerationFeedbackTextView.setTextColor(Color.WHITE);
-                findViewById(R.id.navigation_layout).setBackgroundColor(Color.RED);
+                findViewById(R.id.navigation_layout).setBackgroundColor(Color.parseColor("#F44336"));
                 mAccelerationFeedbackTextView.setText("BAD!");
                 mAccelerationValueTextView.setText(Float.toString(mAccelerationValue));
                 mBadCount++;
             } else if (mAccelerationValue > 1.5) {
                 mAccelerationValueTextView.setTextColor(Color.DKGRAY);
                 mAccelerationFeedbackTextView.setTextColor(Color.DKGRAY);
-                findViewById(R.id.navigation_layout).setBackgroundColor(Color.LTGRAY);
+                findViewById(R.id.navigation_layout).setBackgroundColor(Color.parseColor("#FFEB3B"));
                 mAccelerationFeedbackTextView.setText("OKEY!");
                 mAccelerationValueTextView.setText(Float.toString(mAccelerationValue));
                 mOkCount++;
             } else {
                 mAccelerationValueTextView.setTextColor(Color.DKGRAY);
                 mAccelerationFeedbackTextView.setTextColor(Color.DKGRAY);
-                findViewById(R.id.navigation_layout).setBackgroundColor(Color.GREEN);
+                findViewById(R.id.navigation_layout).setBackgroundColor(Color.parseColor("#4CAF50"));
                 mAccelerationFeedbackTextView.setText("GOOD!");
                 mAccelerationValueTextView.setText(Float.toString(mAccelerationValue));
                 mGoodCount++;
