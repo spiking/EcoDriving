@@ -28,6 +28,7 @@ public class DetailedStatsActivity extends AppCompatActivity {
             System.out.println(score);
         }
 
+
     }
 
 }

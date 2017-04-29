@@ -41,6 +41,7 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
     private Sensor mLinearAccelerometer;
     private float[] mLinearAccelerationValues;
     private Timer mTimer;
+    private TimerTask mTimerTask;
     private float mAccelerationValue;
 
     //TextView
@@ -49,7 +50,7 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
     private static int mCounter = 0;
 
     //Button
-    private Button mStopButton;
+    private Button mSessionButton;
 
     // Values
     private int mBadCount;
@@ -59,7 +60,9 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
     // Speech
     private final int REQ_CODE_SPEECH_INPUT = 100;
     private ShakeDetector shakeDetector;
-    private static boolean mMapActivityShowing = true;
+
+    // Running
+    private boolean isRunning;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,7 +73,7 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        mStopButton = (Button) findViewById(R.id.stop_button);
+        mSessionButton = (Button) findViewById(R.id.session_button);
 
         mLinearAccelerationValues = new float[3];
         mAccelerationValue = 0;
@@ -80,10 +83,9 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
         mAccelerationValueTextView = (TextView) findViewById(R.id.navigation_acceleration_value);
         mAccelerationFeedbackTextView = (TextView) findViewById(R.id.navigation_feedback);
 
-        mTimer = new Timer();
-        startUITimer();
-
-        resetCounts();
+        resetData();
+        startSession();
+        isRunning = true;
 
         // Setup shaking
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
@@ -92,17 +94,17 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
 
     }
 
-    public void resetCounts() {
-        mBadCount = mOkCount = mGoodCount = mCounter = 0;
-    }
-
-
     public void startUITimer() {
-        mTimer.scheduleAtFixedRate(new TimerTask() {
+        mTimer = new Timer();
+
+        mTimerTask = new TimerTask() {
+            @Override
             public void run() {
                 updateUI();
             }
-        }, 0, 500);
+        };
+
+        mTimer.scheduleAtFixedRate(mTimerTask, 500, 500);
     }
 
     // This method is called directly by the timer, thus it runs on a sub thread
@@ -117,53 +119,51 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
         public void run() {
 
             Log.v("Counter", "RUNNING! " + mCounter++);
+            isRunning = true;
 
             if (mAccelerationValue > 2.5) {
                 mAccelerationValueTextView.setTextColor(Color.WHITE);
                 mAccelerationFeedbackTextView.setTextColor(Color.WHITE);
                 findViewById(R.id.navigation_layout).setBackgroundColor(Color.parseColor("#F44336"));
-                mAccelerationFeedbackTextView.setText("BAD!");
+                mAccelerationFeedbackTextView.setText(getString(R.string.feedback_bad));
                 mAccelerationValueTextView.setText(Float.toString(mAccelerationValue));
                 mBadCount++;
             } else if (mAccelerationValue > 1.5) {
                 mAccelerationValueTextView.setTextColor(Color.DKGRAY);
                 mAccelerationFeedbackTextView.setTextColor(Color.DKGRAY);
                 findViewById(R.id.navigation_layout).setBackgroundColor(Color.parseColor("#FFEB3B"));
-                mAccelerationFeedbackTextView.setText("OKEY!");
+                mAccelerationFeedbackTextView.setText(getString(R.string.feedback_ok));
                 mAccelerationValueTextView.setText(Float.toString(mAccelerationValue));
                 mOkCount++;
             } else {
                 mAccelerationValueTextView.setTextColor(Color.DKGRAY);
                 mAccelerationFeedbackTextView.setTextColor(Color.DKGRAY);
                 findViewById(R.id.navigation_layout).setBackgroundColor(Color.parseColor("#4CAF50"));
-                mAccelerationFeedbackTextView.setText("GOOD!");
+                mAccelerationFeedbackTextView.setText(getString(R.string.feedback_good));
                 mAccelerationValueTextView.setText(Float.toString(mAccelerationValue));
                 mGoodCount++;
             }
         }
     };
 
-    public void initializeSensors() {
-        mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-        mLinearAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
-        mSensorManager.registerListener(this, mLinearAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
-    }
-
-    public void stopSession(View view) {
-        Log.v("STOP", "Stop session!");
-        saveSession();
-    }
-
     @Override
     protected void onResume() {
         super.onResume();
         mSensorManager.registerListener(this, mLinearAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+        if(!isRunning) {
+            resetUI();
+        }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         mSensorManager.unregisterListener(this); // Stop receiving updates
+        if (isRunning) {
+            mTimer.cancel();
+            mTimer.purge();
+            mTimerTask.cancel();
+        }
     }
 
     @Override
@@ -189,6 +189,11 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
         // Chill
     }
 
+    public void initializeSensors() {
+        mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+        mLinearAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
+        mSensorManager.registerListener(this, mLinearAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+    }
 
     public void saveSession() {
 
@@ -220,8 +225,46 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
             e.printStackTrace();
         }
 
-        resetCounts();
         mTimer.cancel();
+        mTimer.purge();
+        mTimerTask.cancel();
+        resetData();
+
+        Intent intent = new Intent(this, DetailedStatsActivity.class);
+        startActivity(intent);
+    }
+
+    public void resetData() {
+        mBadCount = mOkCount = mGoodCount = mCounter = 0;
+    }
+
+
+    public void sessionButtonClicked(View view) {
+        Log.v("SESSION CHANGED", "Session btn clicked!");
+
+        if (isRunning) {
+            saveSession();
+            isRunning = false;
+        } else {
+            System.out.println("START SESSION!");
+            startSession();
+            isRunning = true;
+        }
+    }
+
+    public void resetUI() {
+        mAccelerationValueTextView.setTextColor(Color.DKGRAY);
+        mAccelerationFeedbackTextView.setTextColor(Color.DKGRAY);
+        findViewById(R.id.navigation_layout).setBackgroundColor(Color.parseColor("#4CAF50"));
+        mAccelerationFeedbackTextView.setText(getString(R.string.navigation_feedback_start));
+        mAccelerationValueTextView.setText("0.0");
+        mSessionButton.setText(getString(R.string.start_button));
+    }
+
+    public void startSession() {
+        resetData();
+        startUITimer();
+        mSessionButton.setText(getString(R.string.session_button));
     }
 
     /**
@@ -268,9 +311,9 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
                     System.out.println(result.get(0).toString());
 
                     if (result.get(0).toString().equalsIgnoreCase("stopp")) {
-                        mStopButton.performClick();
+                        mSessionButton.performClick();
                     } else {
-                       Toast.makeText(this, "Invalid command!", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, "Invalid command!", Toast.LENGTH_SHORT).show();
                     }
                 }
                 break;

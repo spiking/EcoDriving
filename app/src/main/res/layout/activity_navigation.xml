@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFFFF"
+    android:background="#FF4CAF50"
     tools:context="com.example.currentplacedetailsonmap.activities.NavigationActivity"
     android:id="@+id/navigation_layout">
 
@@ -20,20 +20,21 @@
         app:layout_constraintRight_toRightOf="parent" />
 
     <Button
-        android:id="@+id/stop_button"
+        android:id="@+id/session_button"
         android:layout_width="0dp"
         android:layout_height="60dp"
         android:layout_marginBottom="8dp"
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
-        android:text="@string/stop_button"
-        android:onClick="stopSession"
+        android:text="@string/session_button"
+        android:onClick="sessionButtonClicked"
         android:textSize="18sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp" />
+
 
     <TextView
         android:id="@+id/navigation_acceleration_value"
@@ -44,7 +45,6 @@
         android:layout_marginRight="24dp"
         android:layout_marginTop="8dp"
         android:gravity="center"
-        android:text="@string/navigation_acceleration_value"
         android:textAlignment="center"
         android:textColor="#696969"
         android:textSize="30sp"
@@ -63,11 +63,10 @@
         android:layout_marginBottom="24dp"
         android:layout_marginLeft="24dp"
         android:layout_marginRight="24dp"
-        android:textStyle="bold"
-        android:text="@string/navigation_feedback"
         android:textAlignment="center"
         android:textColor="#696969"
         android:textSize="30sp"
+        android:textStyle="bold"
         app:layout_constraintBottom_toTopOf="@+id/navigation_acceleration_value"
         app:layout_constraintHorizontal_bias="0.502"
         app:layout_constraintLeft_toLeftOf="parent"
