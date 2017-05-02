@@ -31,6 +31,7 @@ import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
+
 public class NavigationActivity extends AppCompatActivity implements SensorEventListener, ShakeDetector.Listener {
 
     // Side menu and toolbar customization.
@@ -121,26 +122,34 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
             Log.v("Counter", "RUNNING! " + mCounter++);
             isRunning = true;
 
-            if (mAccelerationValue > 2.5) {
+            if (mAccelerationValue > 10) {
+                return;
+            }
+
+
+
+            double roundedAccelerationValue = Math.round(mAccelerationValue * 100.0) / 100.0;
+
+            if (mAccelerationValue > 4) {
                 mAccelerationValueTextView.setTextColor(Color.WHITE);
                 mAccelerationFeedbackTextView.setTextColor(Color.WHITE);
                 findViewById(R.id.navigation_layout).setBackgroundColor(Color.parseColor("#F44336"));
                 mAccelerationFeedbackTextView.setText(getString(R.string.feedback_bad));
-                mAccelerationValueTextView.setText(Float.toString(mAccelerationValue));
+                mAccelerationValueTextView.setText(Double.toString(roundedAccelerationValue));
                 mBadCount++;
-            } else if (mAccelerationValue > 1.5) {
+            } else if (mAccelerationValue > 2) {
                 mAccelerationValueTextView.setTextColor(Color.DKGRAY);
                 mAccelerationFeedbackTextView.setTextColor(Color.DKGRAY);
                 findViewById(R.id.navigation_layout).setBackgroundColor(Color.parseColor("#FFEB3B"));
                 mAccelerationFeedbackTextView.setText(getString(R.string.feedback_ok));
-                mAccelerationValueTextView.setText(Float.toString(mAccelerationValue));
+                mAccelerationValueTextView.setText(Double.toString(roundedAccelerationValue));
                 mOkCount++;
             } else {
                 mAccelerationValueTextView.setTextColor(Color.DKGRAY);
                 mAccelerationFeedbackTextView.setTextColor(Color.DKGRAY);
                 findViewById(R.id.navigation_layout).setBackgroundColor(Color.parseColor("#4CAF50"));
                 mAccelerationFeedbackTextView.setText(getString(R.string.feedback_good));
-                mAccelerationValueTextView.setText(Float.toString(mAccelerationValue));
+                mAccelerationValueTextView.setText(Double.toString(roundedAccelerationValue));
                 mGoodCount++;
             }
         }

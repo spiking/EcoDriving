@@ -28,6 +28,7 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.PlaceLikelihood;
 import com.google.android.gms.location.places.PlaceLikelihoodBuffer;
@@ -42,6 +43,7 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.mikepenz.materialdrawer.Drawer;
 
@@ -68,7 +70,7 @@ import java.util.List;
  */
 public class MapFragment extends Fragment implements OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener {
+        GoogleApiClient.OnConnectionFailedListener, LocationListener {
 
     private MapView mMapView;
     private static final String TAG = MapsActivityCurrentPlace.class.getSimpleName();
@@ -109,6 +111,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
 
     private ArrayList<LatLng> MarkerPoints;
 
+    private ArrayList<LatLng> points; //added
+    Polyline line; //added
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -148,7 +153,39 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
 
         MarkerPoints = new ArrayList<>();
 
+        points = new ArrayList<LatLng>(); //added
+
         return rootView;
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+
+        System.out.println("Location updated!");
+
+        double latitude = location.getLatitude();
+        double longitude = location.getLongitude();
+        LatLng latLng = new LatLng(latitude, longitude); //you already have this
+
+        points.add(latLng); //added
+
+        redrawLine(); //added
+
+    }
+
+    private void redrawLine(){
+
+        System.out.println("Draw line!");
+
+        mMap.clear();  //clears all Markers and Polylines
+
+        PolylineOptions options = new PolylineOptions().width(5).color(Color.BLUE).geodesic(true);
+        for (int i = 0; i < points.size(); i++) {
+            LatLng point = points.get(i);
+            options.add(point);
+        }
+        /*addMarker(); //add Marker in current position*/
+        line = mMap.addPolyline(options); //add Polyline
     }
 
     @Override
@@ -277,7 +314,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
 
             }
         });
-
     }
 
     /**
