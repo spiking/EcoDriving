@@ -215,7 +215,13 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
 
     public void loadSlidesView() {
         Intent intent = new Intent(this, WelcomeSlidesActivity.class);
-        startActivity(intent);
+        intent.putExtra("SHOW_ONCE_MORE", "Show");
+
+        // Verify that the intent will resolve to an activity
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            Log.v("LOAD", "Welcome slides activity was started");
+            startActivity(intent);
+        }
     }
 
     public void loadSettingsView() {
