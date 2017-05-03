@@ -33,6 +33,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <!-- Welcome Slides -->
+        <activity android:name=".activities.WelcomeSlidesActivity" />
         <activity android:name=".activities.MapsActivityCurrentPlace" />
         <activity android:name=".activities.NavigationActivity">
 

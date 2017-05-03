@@ -27,4 +27,28 @@
     <string name="feedback_ok">OKEY</string>
     <string name="feedback_bad">BAD</string>
     <string name="navigation_feedback_start">NEW SESSION</string>
+
+    <!-- Welcome Slide Activity -->
+    <string name="title_activity_welcome">Home Screen</string>
+    <string name="next">NEXT</string>
+    <string name="skip">SKIP</string>
+    <string name="start">GOT IT</string>
+
+    <string name="slide_1_title">Welcome to EcoDriving!</string>
+    <string name="slide_1_desc">This is an introduction to your personal EcoDriving experience. To start of your journey to become a fully fledged Eco Driver, click Next.</string>
+
+    <string name="slide_2_title">Drive for the environment</string>
+    <string name="slide_2_desc">EcoDriving helps you become a more eco-friendly driver! We study your driving habits by continuously update, calculate and monitor your actions to optimize your driving for environmental purposes. </string>
+
+    <string name="slide_3_title">Live feedback</string>
+    <string name="slide_3_desc">You can initiate or terminate a driving run by either clicking start/stop or shake your phone and speak "Start" or "Stop". While you are driving your main goal is to keep the green status as much as you can while receiving helpful tips from the app.</string>
+
+    <string name="slide_4_title">Statistics</string>
+    <string name="slide_4_desc">EcoDriving always keep track of your progress so that you can improve your driving habits. Compare your statistics from previous routes and receive concrete facts on how you are performing and what you can improve on!</string>
+
+    <string name="slide_5_title">Happy EcoDriving!</string>
+    <string name="slide_5_desc">Now you are all set and ready to drive for a better future! But remember, avoiding the use of a vehicle is always the better environmental option.</string>
+
+    <string name="play_again_desc">To see the welcome slider again, goto Settings -> apps -> welcome slider -> clear data</string>
+    <string name="play_again">Play Again</string>
 </resources>
