@@ -35,11 +35,11 @@ public class WelcomeSlidesActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         // Checking for first time launch - before calling setContentView()
-       /* prefManager = new PrefManager(this);
+        prefManager = new PrefManager(this);
         if (!prefManager.isFirstTimeLaunch()) {
             launchHomeScreen();
             finish();
-        }*/
+        }
 
         // Making notification bar transparent
         if (Build.VERSION.SDK_INT >= 21) {
@@ -120,7 +120,7 @@ public class WelcomeSlidesActivity extends AppCompatActivity {
     }
 
     private void launchHomeScreen() {
-        //prefManager.setFirstTimeLaunch(false); //Sätts till true om firstTime önskas
+        prefManager.setFirstTimeLaunch(false); //Sätts till false om firstTime önskas varje gång
         startActivity(new Intent(WelcomeSlidesActivity.this, MapsActivityCurrentPlace.class));
         finish();
     }

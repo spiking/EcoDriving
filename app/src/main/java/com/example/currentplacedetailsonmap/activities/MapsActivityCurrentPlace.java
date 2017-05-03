@@ -163,7 +163,8 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
                         new PrimaryDrawerItem().withIdentifier(1).withName("Example@ecodriving.com").withBadge("1").withBadgeStyle(new BadgeStyle().withTextColor(Color.WHITE).withColorRes(R.color.md_red_700)),
                         new DividerDrawerItem(),
                         new SecondaryDrawerItem().withIdentifier(2).withName("Statistics"),
-                        new SecondaryDrawerItem().withIdentifier(3).withName("Settings")
+                        new SecondaryDrawerItem().withIdentifier(3).withName("Tutorial"),
+                        new SecondaryDrawerItem().withIdentifier(4).withName("Settings")
                 )
                 .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
                     @Override
@@ -186,6 +187,10 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
                                 break;
                             case 3:
                                 Log.v("ID", id + " was chosen");
+                                loadSlidesView();
+                                break;
+                            case 4:
+                                Log.v("ID", id + " was chosen");
                                 loadSettingsView();
                                 break;
                             default:
@@ -205,6 +210,11 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
 
     public void loadStatsView() {
         Intent intent = new Intent(this, StatsActivity.class);
+        startActivity(intent);
+    }
+
+    public void loadSlidesView() {
+        Intent intent = new Intent(this, WelcomeSlidesActivity.class);
         startActivity(intent);
     }
 
