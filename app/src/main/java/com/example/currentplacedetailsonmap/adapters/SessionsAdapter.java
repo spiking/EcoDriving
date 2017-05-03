@@ -34,8 +34,9 @@ public class SessionsAdapter extends RecyclerView.Adapter<SessionsViewHolder> {
             @Override
             public void onClick(View v) {
                 Intent i = new Intent(v.getContext().getApplicationContext(), DetailedStatsActivity.class);
-                i.putExtra("date", session.getDate());
-                i.putExtra("score", session.getTotalPoints());
+                i.putExtra("DATE", session.getDate());
+                i.putExtra("SCORE", session.getTotalPoints());
+                i.putExtra("ALL_SCORES", session.getAllScores());
                 v.getContext().startActivity(i);
             }
         });

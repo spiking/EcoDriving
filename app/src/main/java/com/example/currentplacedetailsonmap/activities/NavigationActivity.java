@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -59,6 +60,7 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
     private int mOkCount;
     private int mGoodCount;
     private int mTotalScore;
+    private HashMap<Integer, Integer> mScores;
 
     // Speech
     private final int REQ_CODE_SPEECH_INPUT = 100;
@@ -86,6 +88,7 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
         mLinearAccelerationValues = new float[3];
         mAccelerationValue = 0;
         mTotalScore = 0;
+        mScores = new HashMap<>();
 
         mMPGood = MediaPlayer.create(this, R.raw.well_done);
         mMPBad = MediaPlayer.create(this, R.raw.take_it_easy);
@@ -132,6 +135,9 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
 
             Log.v("Counter", "RUNNING! " + mCounter++);
             isRunning = true;
+
+            mScores.put(mCounter, mTotalScore);
+            System.out.println("COUNTER = " + mCounter + " VALUE = " + mTotalScore);
 
             if (mAccelerationValue > 10) {
                 return;
@@ -256,7 +262,7 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String stringDate = sdf.format(calender.getTime());
 
-        Session session = new Session(0, 58.36014, 12.344412, 58.283489, 12.285821, distanceInMeters, mTotalCount, mBadCount, mOkCount, mGoodCount, stringDate);
+        Session session = new Session(0, 58.36014, 12.344412, 58.283489, 12.285821, distanceInMeters, mTotalCount, mBadCount, mOkCount, mGoodCount, stringDate, mScores);
 
         try {
             // Save current session to sessions
@@ -267,17 +273,23 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
             e.printStackTrace();
         }
 
+        Intent i = new Intent(getApplicationContext(), DetailedStatsActivity.class);
+        i.putExtra("DATE", session.getDate());
+        i.putExtra("SCORE", session.getTotalPoints());
+        i.putExtra("ALL_SCORES", mScores);
+        startActivity(i);
+
+        System.out.println(mScores);
+
         mTimer.cancel();
         mTimer.purge();
         mTimerTask.cancel();
         resetData();
-
-        Intent intent = new Intent(this, DetailedStatsActivity.class);
-        startActivity(intent);
     }
 
     public void resetData() {
         mBadCount = mOkCount = mGoodCount = mCounter = mTotalScore = 0;
+        mScores = new HashMap<>();
     }
 
 
