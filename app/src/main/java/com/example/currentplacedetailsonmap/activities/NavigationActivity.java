@@ -8,6 +8,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.location.Location;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.speech.RecognizerIntent;
 import android.support.v7.app.AppCompatActivity;
@@ -57,6 +58,7 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
     private int mBadCount;
     private int mOkCount;
     private int mGoodCount;
+    private int mTotalScore;
 
     // Speech
     private final int REQ_CODE_SPEECH_INPUT = 100;
@@ -64,6 +66,11 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
 
     // Running
     private boolean isRunning;
+    private boolean voiceInput;
+
+    // Media player
+    private MediaPlayer mMPGood;
+    private MediaPlayer mMPBad;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,6 +85,10 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
 
         mLinearAccelerationValues = new float[3];
         mAccelerationValue = 0;
+        mTotalScore = 0;
+
+        mMPGood = MediaPlayer.create(this, R.raw.well_done);
+        mMPBad = MediaPlayer.create(this, R.raw.take_it_easy);
 
         initializeSensors();
 
@@ -87,12 +98,12 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
         resetData();
         startSession();
         isRunning = true;
+        voiceInput = false;
 
         // Setup shaking
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         shakeDetector = new ShakeDetector(this);
         shakeDetector.start(mSensorManager);
-
     }
 
     public void startUITimer() {
@@ -126,41 +137,62 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
                 return;
             }
 
-
-
+            // Not showing this value
             double roundedAccelerationValue = Math.round(mAccelerationValue * 100.0) / 100.0;
 
             if (mAccelerationValue > 4) {
+                updateTotalScore((int) (-mAccelerationValue * 10));
                 mAccelerationValueTextView.setTextColor(Color.WHITE);
                 mAccelerationFeedbackTextView.setTextColor(Color.WHITE);
                 findViewById(R.id.navigation_layout).setBackgroundColor(Color.parseColor("#F44336"));
                 mAccelerationFeedbackTextView.setText(getString(R.string.feedback_bad));
-                mAccelerationValueTextView.setText(Double.toString(roundedAccelerationValue));
+                mAccelerationValueTextView.setText(Double.toString(mTotalScore));
                 mBadCount++;
+                mGoodCount = 0;
+                mMPBad.start();
             } else if (mAccelerationValue > 2) {
                 mAccelerationValueTextView.setTextColor(Color.DKGRAY);
                 mAccelerationFeedbackTextView.setTextColor(Color.DKGRAY);
                 findViewById(R.id.navigation_layout).setBackgroundColor(Color.parseColor("#FFEB3B"));
                 mAccelerationFeedbackTextView.setText(getString(R.string.feedback_ok));
-                mAccelerationValueTextView.setText(Double.toString(roundedAccelerationValue));
+                mAccelerationValueTextView.setText(Double.toString(mTotalScore));
                 mOkCount++;
+                mGoodCount = 0;
             } else {
+                updateTotalScore((int) (2-mAccelerationValue) * 10);
                 mAccelerationValueTextView.setTextColor(Color.DKGRAY);
                 mAccelerationFeedbackTextView.setTextColor(Color.DKGRAY);
                 findViewById(R.id.navigation_layout).setBackgroundColor(Color.parseColor("#4CAF50"));
                 mAccelerationFeedbackTextView.setText(getString(R.string.feedback_good));
-                mAccelerationValueTextView.setText(Double.toString(roundedAccelerationValue));
+                mAccelerationValueTextView.setText(Double.toString(mTotalScore));
                 mGoodCount++;
+
+                if (mGoodCount >= 20) {
+                    mMPGood.start();
+                    mGoodCount = 0;
+                }
             }
         }
     };
+
+    public void updateTotalScore(int score) {
+        mTotalScore += score;
+        if (mTotalScore < 0) {
+            mTotalScore = 0;
+        }
+    }
 
     @Override
     protected void onResume() {
         super.onResume();
         mSensorManager.registerListener(this, mLinearAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+
         if(!isRunning) {
             resetUI();
+        }
+
+        if(isRunning && voiceInput) {
+            voiceInput = false;
         }
     }
 
@@ -168,7 +200,8 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
     protected void onPause() {
         super.onPause();
         mSensorManager.unregisterListener(this); // Stop receiving updates
-        if (isRunning) {
+
+        if (isRunning && !voiceInput) {
             mTimer.cancel();
             mTimer.purge();
             mTimerTask.cancel();
@@ -244,7 +277,7 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
     }
 
     public void resetData() {
-        mBadCount = mOkCount = mGoodCount = mCounter = 0;
+        mBadCount = mOkCount = mGoodCount = mCounter = mTotalScore = 0;
     }
 
 
@@ -296,6 +329,7 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
 
         try {
             startActivityForResult(intent, REQ_CODE_SPEECH_INPUT);
+            voiceInput = true;
         } catch (ActivityNotFoundException a) {
             Toast.makeText(getApplicationContext(),
                     getString(R.string.speech_not_supported),
