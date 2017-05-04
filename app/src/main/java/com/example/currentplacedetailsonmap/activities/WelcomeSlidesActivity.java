@@ -9,6 +9,7 @@ import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,11 +36,19 @@ public class WelcomeSlidesActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         // Checking for first time launch - before calling setContentView()
-       /* prefManager = new PrefManager(this);
+        prefManager = new PrefManager(this);
+        String showAgain = getIntent().getStringExtra("SHOW_ONCE_MORE");
+        Log.v("WELCOME", "showAgain is: " + showAgain);
+
+        if(showAgain != null && showAgain.equals("Show"))
+            prefManager.setFirstTimeLaunch(true);
+
+
         if (!prefManager.isFirstTimeLaunch()) {
+            Log.v("WELCOME", "Launching Home activity");
             launchHomeScreen();
             finish();
-        }*/
+        }
 
         // Making notification bar transparent
         if (Build.VERSION.SDK_INT >= 21) {
@@ -120,7 +129,7 @@ public class WelcomeSlidesActivity extends AppCompatActivity {
     }
 
     private void launchHomeScreen() {
-        //prefManager.setFirstTimeLaunch(false); //Sätts till true om firstTime önskas
+        prefManager.setFirstTimeLaunch(false); //Sätts till true om firstTime önskas varje gång
         startActivity(new Intent(WelcomeSlidesActivity.this, MapsActivityCurrentPlace.class));
         finish();
     }

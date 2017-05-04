@@ -4,6 +4,8 @@
     <color name="colorPrimaryDark">#4e4e4e</color>
     <color name="colorAccent">#FF4081</color>
 
+    <!-- Welcome Slides -->
+
     <!-- Screens background color-->
     <color name="bg_screen1">#3e3e3e</color>
     <color name="bg_screen2">#20d2bb</color>
@@ -23,7 +25,7 @@
     <color name="dot_light_screen2">#8cf9eb</color>
     <color name="dot_light_screen3">#93c6fd</color>
     <color name="dot_light_screen4">#e4b5fc</color>
-    <color name="dot_light_screen5">#81c784</color>
+    <color name="dot_light_screen5">#a4d7a6</color>
 
     <array name="array_dot_active">
         <item>@color/dot_light_screen1</item>
