@@ -10,7 +10,9 @@ import android.hardware.SensorManager;
 import android.location.Location;
 import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.os.Handler;
 import android.speech.RecognizerIntent;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -20,6 +22,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.currentplacedetailsonmap.R;
+import com.example.currentplacedetailsonmap.fragments.MapFragment;
+import com.example.currentplacedetailsonmap.models.LatLngSerializedObject;
 import com.example.currentplacedetailsonmap.models.Session;
 import com.example.currentplacedetailsonmap.services.DataService;
 import com.squareup.seismic.ShakeDetector;
@@ -61,6 +65,7 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
     private int mGoodCount;
     private int mTotalScore;
     private HashMap<Integer, Integer> mScores;
+    private boolean voiceFeedbackIsTimedOut;
 
     // Speech
     private final int REQ_CODE_SPEECH_INPUT = 100;
@@ -73,6 +78,9 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
     // Media player
     private MediaPlayer mMPGood;
     private MediaPlayer mMPBad;
+
+    // Fragment
+    private MapFragment mapFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,30 +110,33 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
         startSession();
         isRunning = true;
         voiceInput = false;
+        voiceFeedbackIsTimedOut = false;
 
         // Setup shaking
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         shakeDetector = new ShakeDetector(this);
         shakeDetector.start(mSensorManager);
+
+        FragmentManager manager = getSupportFragmentManager();
+        mapFragment = (MapFragment) manager.findFragmentById(R.id.map_fragment);
+        mapFragment.startRouteNavigation();
     }
 
     public void startUITimer() {
         mTimer = new Timer();
-
         mTimerTask = new TimerTask() {
             @Override
             public void run() {
-                updateUI();
+                updateUIContinuesly();
             }
         };
-
         mTimer.scheduleAtFixedRate(mTimerTask, 500, 500);
     }
 
     // This method is called directly by the timer, thus it runs on a sub thread
     // Call The runOnUIThread via runnable to be able to update UI elements
 
-    public void updateUI() {
+    public void updateUIContinuesly() {
         this.runOnUiThread(RunnableUpdateUI);
     }
 
@@ -144,48 +155,65 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
             }
 
             // Not showing this value
-            double roundedAccelerationValue = Math.round(mAccelerationValue * 100.0) / 100.0;
+            double roundedAccelerationValue = Math.abs(Math.round(mAccelerationValue * 100.0) / 100.0);
+
+            System.out.println(mAccelerationValue);
 
             if (mAccelerationValue > 4) {
-                updateTotalScore((int) (-mAccelerationValue * 10));
-                mAccelerationValueTextView.setTextColor(Color.WHITE);
-                mAccelerationFeedbackTextView.setTextColor(Color.WHITE);
-                findViewById(R.id.navigation_layout).setBackgroundColor(Color.parseColor("#F44336"));
-                mAccelerationFeedbackTextView.setText(getString(R.string.feedback_bad));
-                mAccelerationValueTextView.setText(Double.toString(mTotalScore));
+                updateFeedbackUI(Color.WHITE, "#F44336", R.string.feedback_bad, (int) (-mAccelerationValue * 10), false);
                 mBadCount++;
                 mGoodCount = 0;
-                mMPBad.start();
+
+                if (!voiceFeedbackIsTimedOut) {
+                    mMPBad.start();
+                    voiceFeedbackTimeout();
+                    voiceFeedbackIsTimedOut = true;
+                }
+
             } else if (mAccelerationValue > 2) {
-                mAccelerationValueTextView.setTextColor(Color.DKGRAY);
-                mAccelerationFeedbackTextView.setTextColor(Color.DKGRAY);
-                findViewById(R.id.navigation_layout).setBackgroundColor(Color.parseColor("#FFEB3B"));
-                mAccelerationFeedbackTextView.setText(getString(R.string.feedback_ok));
-                mAccelerationValueTextView.setText(Double.toString(mTotalScore));
+                updateFeedbackUI(Color.DKGRAY, "#FFEB3B", R.string.feedback_ok, mTotalScore, true);
                 mOkCount++;
                 mGoodCount = 0;
             } else {
-                updateTotalScore((int) (2-mAccelerationValue) * 10);
-                mAccelerationValueTextView.setTextColor(Color.DKGRAY);
-                mAccelerationFeedbackTextView.setTextColor(Color.DKGRAY);
-                findViewById(R.id.navigation_layout).setBackgroundColor(Color.parseColor("#4CAF50"));
-                mAccelerationFeedbackTextView.setText(getString(R.string.feedback_good));
-                mAccelerationValueTextView.setText(Double.toString(mTotalScore));
+                updateFeedbackUI(Color.DKGRAY, "#4CAF50", R.string.feedback_good, (int) (2-mAccelerationValue) * 10, false);
                 mGoodCount++;
 
-                if (mGoodCount >= 20) {
+                if (mGoodCount >= 20 && !voiceFeedbackIsTimedOut) {
                     mMPGood.start();
                     mGoodCount = 0;
+                    voiceFeedbackTimeout();
+                    voiceFeedbackIsTimedOut = true;
                 }
             }
         }
     };
 
-    public void updateTotalScore(int score) {
-        mTotalScore += score;
-        if (mTotalScore < 0) {
-            mTotalScore = 0;
+    public void updateFeedbackUI(int textColor, String backgroundColor, int feedbackString, int scoreChange, boolean feedbackOk) {
+
+        // Dont change score at ok screen
+
+        if (!feedbackOk) {
+            mTotalScore += scoreChange;
+            if (mTotalScore < 0) {
+                mTotalScore = 0;
+            }
         }
+
+        mAccelerationValueTextView.setTextColor(textColor);
+        mAccelerationFeedbackTextView.setTextColor(textColor);
+        findViewById(R.id.navigation_layout).setBackgroundColor(Color.parseColor(backgroundColor));
+        mAccelerationFeedbackTextView.setText(getString(feedbackString));
+        mAccelerationValueTextView.setText(Double.toString(mTotalScore));
+
+    }
+
+    public void voiceFeedbackTimeout() {
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            public void run() {
+                voiceFeedbackIsTimedOut = false; // Reset timeout after 10 sec
+            }
+        }, 10000);
     }
 
     @Override
@@ -262,7 +290,10 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String stringDate = sdf.format(calender.getTime());
 
-        Session session = new Session(0, 58.36014, 12.344412, 58.283489, 12.285821, distanceInMeters, mTotalCount, mBadCount, mOkCount, mGoodCount, stringDate, mScores);
+        // Fetch route from map fragment
+        ArrayList<LatLngSerializedObject> mRoute = mapFragment.getRoute();
+
+        Session session = new Session(0, 58.36014, 12.344412, 58.283489, 12.285821, distanceInMeters, mTotalCount, mBadCount, mOkCount, mGoodCount, stringDate, mScores, mRoute);
 
         try {
             // Save current session to sessions
@@ -277,6 +308,7 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
         i.putExtra("DATE", session.getDate());
         i.putExtra("SCORE", session.getTotalPoints());
         i.putExtra("ALL_SCORES", mScores);
+        i.putExtra("ROUTE", mRoute);
         startActivity(i);
 
         System.out.println(mScores);
@@ -302,6 +334,7 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
         } else {
             System.out.println("START SESSION!");
             startSession();
+            mapFragment.startRouteNavigation();
             isRunning = true;
         }
     }

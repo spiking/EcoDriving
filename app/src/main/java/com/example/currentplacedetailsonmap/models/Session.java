@@ -3,6 +3,7 @@ package com.example.currentplacedetailsonmap.models;
 import android.support.annotation.NonNull;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
@@ -23,8 +24,9 @@ public class Session implements Serializable, Comparable {
     private int goodPoints;
     private String date;
     private HashMap<Integer, Integer> allScores;
+    private ArrayList<LatLngSerializedObject> route;
 
-    public Session(int id, double startLatitude, double startLongitude, double endLatitude, double endLongitude, double distance, int totalPoints, int badPoints, int okPoints, int goodPoints, String date, HashMap<Integer, Integer> allScores) {
+    public Session(int id, double startLatitude, double startLongitude, double endLatitude, double endLongitude, double distance, int totalPoints, int badPoints, int okPoints, int goodPoints, String date, HashMap<Integer, Integer> allScores, ArrayList<LatLngSerializedObject> route) {
         this.id = id;
         this.startLatitude = startLatitude;
         this.startLongitude = startLongitude;
@@ -37,6 +39,7 @@ public class Session implements Serializable, Comparable {
         this.goodPoints = goodPoints;
         this.date = date;
         this.allScores = allScores;
+        this.route = route;
     }
 
     @Override
@@ -51,6 +54,10 @@ public class Session implements Serializable, Comparable {
 
     public HashMap<Integer, Integer> getAllScores() {
         return allScores;
+    }
+
+    public ArrayList<LatLngSerializedObject> getRoute() {
+        return route;
     }
 
     public String getDate() {

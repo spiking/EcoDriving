@@ -37,6 +37,7 @@ public class SessionsAdapter extends RecyclerView.Adapter<SessionsViewHolder> {
                 i.putExtra("DATE", session.getDate());
                 i.putExtra("SCORE", session.getTotalPoints());
                 i.putExtra("ALL_SCORES", session.getAllScores());
+                i.putExtra("ROUTE", session.getRoute());
                 v.getContext().startActivity(i);
             }
         });

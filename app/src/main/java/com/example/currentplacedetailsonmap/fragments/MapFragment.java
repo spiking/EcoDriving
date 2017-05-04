@@ -1,6 +1,7 @@
 package com.example.currentplacedetailsonmap.fragments;
 
 
+import android.Manifest;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
@@ -8,6 +9,7 @@ import android.graphics.Color;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
@@ -23,11 +25,11 @@ import android.widget.Toast;
 import com.example.currentplacedetailsonmap.R;
 import com.example.currentplacedetailsonmap.activities.DataParser;
 import com.example.currentplacedetailsonmap.activities.MapsActivityCurrentPlace;
+import com.example.currentplacedetailsonmap.models.LatLngSerializedObject;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.PlaceLikelihood;
 import com.google.android.gms.location.places.PlaceLikelihoodBuffer;
@@ -68,7 +70,7 @@ import java.util.List;
  */
 public class MapFragment extends Fragment implements OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener, LocationListener {
+        GoogleApiClient.OnConnectionFailedListener {
 
     private MapView mMapView;
     private static final String TAG = MapsActivityCurrentPlace.class.getSimpleName();
@@ -103,8 +105,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
     // Route
     private List<LatLng> mRoutePoints = new ArrayList<LatLng>();
     private ArrayList<LatLng> mMarkerPoints;
-    private ArrayList<LatLng> mPoints; //added
-    Polyline line;
+    private ArrayList<LatLngSerializedObject> mPoints; //added
+    private Polyline mLine;
+    private Handler routeHandler = new Handler();
+
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -146,36 +151,90 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
         return rootView;
     }
 
-    // Not in use
+    public void getLastKnownLocation() {
 
-    @Override
-    public void onLocationChanged(Location location) {
+        if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            if (mMap != null) {
+                mMap.setMyLocationEnabled(true);
+            }
+        } else {
+            // Show request permission.
+            return;
+        }
 
-        System.out.println("Location updated!");
+        Location currentLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+        Log.v("ROUTING", "Adding new data point");
+        Log.v("ROUTING_LONG", Double.toString(currentLocation.getLongitude()));
+        Log.v("ROUTING_LAT", Double.toString(currentLocation.getLatitude()));
 
-        double latitude = location.getLatitude();
-        double longitude = location.getLongitude();
-        LatLng latLng = new LatLng(latitude, longitude);
-        mPoints.add(latLng);
-        redrawLine();
-
+        mPoints.add(new LatLngSerializedObject(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude())));
     }
 
     // Not in use
 
-    private void redrawLine(){
+    public void drawRoute(ArrayList<LatLngSerializedObject> route) {
 
-        System.out.println("Draw line!");
+        System.out.println("Draw route!");
 
         mMap.clear();
 
-        PolylineOptions options = new PolylineOptions().width(5).color(Color.BLUE).geodesic(true);
-        for (int i = 0; i < mPoints.size(); i++) {
-            LatLng point = mPoints.get(i);
+        PolylineOptions options = new PolylineOptions().width(15).color(Color.parseColor("#2196F3")).geodesic(true);
+
+        for (int i = 0; i < route.size(); i++) {
+
+            if (i == 0) {
+                // Start marker
+                addMarker(route.get(i).getLatLng(), true);
+            }
+
+            if (i == route.size()-1) {
+                // Destination marker
+                addMarker(route.get(i).getLatLng(), false);
+            }
+
+            LatLng point = route.get(i).getLatLng();
             options.add(point);
+
         }
 
-        line = mMap.addPolyline(options); //add Polyline
+        mLine = mMap.addPolyline(options);
+    }
+
+    public void addMarker(LatLng position, boolean start) {
+
+        MarkerOptions options = new MarkerOptions();
+
+        if (start) {
+            mMarkerPoints.add(position);
+            options.position(position);
+            options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+        } else {
+            mMarkerPoints.add(position);
+            options.position(position);
+            options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
+        }
+
+        mMap.addMarker(options);
+
+    }
+
+    // Save route cordinates through getLastKnownLocation() every 5 sec
+
+    private Runnable runnable = new Runnable() {
+        @Override
+        public void run() {
+            getLastKnownLocation();
+            routeHandler.postDelayed(this, 5000);
+        }
+    };
+
+    public ArrayList<LatLngSerializedObject> getRoute() {
+        return mPoints;
+    }
+
+    public void startRouteNavigation() {
+        routeHandler.postDelayed(runnable, 100);
     }
 
     @Override
@@ -190,6 +249,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
         super.onPause();
         System.out.println("ON PAUSE");
         mMapView.onPause();
+        routeHandler.removeCallbacks(runnable);
     }
 
     @Override
@@ -301,14 +361,16 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
                     FetchUrl.execute(url);
                     //move map camera
                     mMap.moveCamera(CameraUpdateFactory.newLatLng(origin));
-                    mMap.animateCamera(CameraUpdateFactory.zoomTo(10));
+                    mMap.animateCamera(CameraUpdateFactory.zoomTo(15));
                 }
 
             }
         });
 
-        addSampleRoute();
+       /* addSampleRoute();*/
+
     }
+
 
     public void addSampleRoute() {
 
@@ -465,7 +527,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
     }
 
     /**
-     * Saves the state of the map when the activity is paused.
+     * fes the state of the map when the activity is paused.
      */
     @Override
     public void onSaveInstanceState(Bundle outState) {

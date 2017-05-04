@@ -72,5 +72,11 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent" />
 
+    <fragment
+        android:id="@+id/map_fragment"
+        android:name="com.example.currentplacedetailsonmap.fragments.MapFragment"
+        android:layout_width="0dp"
+        android:layout_height="0dp"></fragment>
+
 
 </android.support.constraint.ConstraintLayout>

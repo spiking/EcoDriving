@@ -3,14 +3,19 @@ package com.example.currentplacedetailsonmap.activities;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
 import com.example.currentplacedetailsonmap.R;
+import com.example.currentplacedetailsonmap.fragments.MapFragment;
+import com.example.currentplacedetailsonmap.models.LatLngSerializedObject;
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class DetailedStatsActivity extends AppCompatActivity {
@@ -19,6 +24,8 @@ public class DetailedStatsActivity extends AppCompatActivity {
     private HashMap<Integer, Integer> mScores;
     private LineGraphSeries<DataPoint> mSeries;
     private DataPoint[] mValues;
+    private ArrayList<LatLngSerializedObject> mRoute;
+    private MapFragment mapFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,6 +43,7 @@ public class DetailedStatsActivity extends AppCompatActivity {
             int score = extras.getInt("SCORE");
             Intent intent = getIntent();
             mScores = (HashMap<Integer, Integer>) intent.getSerializableExtra("ALL_SCORES");
+            mRoute = (ArrayList<LatLngSerializedObject>) intent.getSerializableExtra("ROUTE");
         }
 
         addGraphData();
@@ -45,8 +53,24 @@ public class DetailedStatsActivity extends AppCompatActivity {
         mSeries.setThickness(15);
         mSeries.setColor(Color.parseColor("#4CAF50"));
         graph.addSeries(mSeries);
-       /* graph.setTitle("Driving Score");*/
+
+        // Add route to map view
+        mHandler.postDelayed(runnable, 1000);
+
+        FragmentManager manager = getSupportFragmentManager();
+        mapFragment = (MapFragment) manager.findFragmentById(R.id.map_fragment);
+
     }
+
+    private Handler mHandler = new Handler();
+
+    private Runnable runnable = new Runnable() {
+        @Override
+        public void run() {
+            mapFragment.drawRoute(mRoute);
+           /* handler.postDelayed(this, 100);*/
+        }
+    };
 
     public void addGraphData() {
         mScores.put(0, 0);
