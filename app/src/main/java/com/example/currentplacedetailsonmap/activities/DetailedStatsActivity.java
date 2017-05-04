@@ -53,6 +53,7 @@ public class DetailedStatsActivity extends AppCompatActivity {
         mSeries.setThickness(15);
         mSeries.setColor(Color.parseColor("#4CAF50"));
         graph.addSeries(mSeries);
+        graph.getViewport().setScalable(true);
 
         // Add route to map view
         mHandler.postDelayed(runnable, 1000);
