@@ -18,7 +18,9 @@ public class Session implements Serializable, Comparable {
     private double endLatitude;
     private double endLongitude;
     private double distance;
-    private int totalPoints;
+    private int highScore;
+    private int currentScore;
+    private int highestStreak;
     private int badPoints;
     private int okPoints;
     private int goodPoints;
@@ -26,14 +28,16 @@ public class Session implements Serializable, Comparable {
     private HashMap<Integer, Integer> allScores;
     private ArrayList<LatLngSerializedObject> route;
 
-    public Session(int id, double startLatitude, double startLongitude, double endLatitude, double endLongitude, double distance, int totalPoints, int badPoints, int okPoints, int goodPoints, String date, HashMap<Integer, Integer> allScores, ArrayList<LatLngSerializedObject> route) {
+    public Session(int id, double startLatitude, double startLongitude, double endLatitude, double endLongitude, double distance, int highScore, int currentScore, int highestStreak, int badPoints, int okPoints, int goodPoints, String date, HashMap<Integer, Integer> allScores, ArrayList<LatLngSerializedObject> route) {
         this.id = id;
         this.startLatitude = startLatitude;
         this.startLongitude = startLongitude;
         this.endLatitude = endLatitude;
         this.endLongitude = endLongitude;
         this.distance = distance;
-        this.totalPoints = totalPoints;
+        this.highScore = highScore;
+        this.currentScore = currentScore;
+        this.highestStreak = highestStreak;
         this.badPoints = badPoints;
         this.okPoints = okPoints;
         this.goodPoints = goodPoints;
@@ -43,13 +47,11 @@ public class Session implements Serializable, Comparable {
     }
 
     @Override
-    public String toString() {
-        return "ID = " + id + "\n" + "StartLatitude = " + startLatitude + "\n" + "StartLongitude = " + startLongitude +
-                "\n" + "EndLatitude = " + endLatitude + "\n" + "EndLongitude = " + endLatitude + "\n" + "Distance = " + distance + "\n" + "Score = " + totalPoints + "\n" + "Bad Points = " + badPoints + "\n" + "Ok Points = " + okPoints + "\n" + "Good Points = " + goodPoints + "\n" + "Date = " + date;
-    }
-
-    public int getTotalPoints() {
-        return totalPoints;
+    public int compareTo(@NonNull Object o) {
+        if(o instanceof Session) {
+            return date.compareTo(((Session) o).getDate());
+        }
+        return 0;
     }
 
     public HashMap<Integer, Integer> getAllScores() {
@@ -64,12 +66,8 @@ public class Session implements Serializable, Comparable {
         return date;
     }
 
-
-    @Override
-    public int compareTo(@NonNull Object o) {
-        if(o instanceof Session) {
-            return date.compareTo(((Session) o).getDate());
-        }
-        return 0;
+    public int getCurrentScore() {
+        return currentScore;
     }
+
 }

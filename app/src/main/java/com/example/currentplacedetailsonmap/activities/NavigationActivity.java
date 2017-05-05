@@ -22,6 +22,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.currentplacedetailsonmap.R;
+import com.example.currentplacedetailsonmap.controller.ScoreHandler;
 import com.example.currentplacedetailsonmap.fragments.MapFragment;
 import com.example.currentplacedetailsonmap.models.LatLngSerializedObject;
 import com.example.currentplacedetailsonmap.models.Session;
@@ -52,7 +53,7 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
     private float mAccelerationValue;
 
     //TextView
-    private TextView mAccelerationValueTextView;
+    private TextView mCurrentScoreTextView;
     private TextView mAccelerationFeedbackTextView;
     private static int mCounter = 0;
 
@@ -60,10 +61,8 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
     private Button mSessionButton;
 
     // Values
-    private int mBadCount;
-    private int mOkCount;
-    private int mGoodCount;
-    private int mTotalScore;
+    private ScoreHandler mScoreHandler;
+
     private HashMap<Integer, Integer> mScores;
     private boolean voiceFeedbackIsTimedOut;
 
@@ -95,15 +94,15 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
 
         mLinearAccelerationValues = new float[3];
         mAccelerationValue = 0;
-        mTotalScore = 0;
         mScores = new HashMap<>();
+        mScoreHandler = new ScoreHandler();
 
         mMPGood = MediaPlayer.create(this, R.raw.well_done);
         mMPBad = MediaPlayer.create(this, R.raw.take_it_easy);
 
         initializeSensors();
 
-        mAccelerationValueTextView = (TextView) findViewById(R.id.navigation_acceleration_value);
+        mCurrentScoreTextView = (TextView) findViewById(R.id.navigation_acceleration_value);
         mAccelerationFeedbackTextView = (TextView) findViewById(R.id.navigation_feedback);
 
         resetData();
@@ -147,22 +146,22 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
             Log.v("Counter", "RUNNING! " + mCounter++);
             isRunning = true;
 
-            mScores.put(mCounter, mTotalScore);
-            System.out.println("COUNTER = " + mCounter + " VALUE = " + mTotalScore);
+            mScores.put(mCounter, mScoreHandler.getCurrentScore());
+            System.out.println("COUNTER = " + mCounter + " VALUE = " + mScoreHandler.getCurrentScore());
 
             if (mAccelerationValue > 10) {
                 return;
             }
 
             // Not showing this value
-            double roundedAccelerationValue = Math.abs(Math.round(mAccelerationValue * 100.0) / 100.0);
+            /* double roundedAccelerationValue = Math.abs(Math.round(mAccelerationValue * 100.0) / 100.0); */
 
-            System.out.println(mAccelerationValue);
+            /* System.out.println(mAccelerationValue); */
 
             if (mAccelerationValue > 4) {
                 updateFeedbackUI(Color.WHITE, "#F44336", R.string.feedback_bad, (int) (-mAccelerationValue * 10), false);
-                mBadCount++;
-                mGoodCount = 0;
+                mScoreHandler.incrementBadCount();
+                mScoreHandler.setCurrentStreak(0);
 
                 if (!voiceFeedbackIsTimedOut) {
                     mMPBad.start();
@@ -171,16 +170,17 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
                 }
 
             } else if (mAccelerationValue > 2) {
-                updateFeedbackUI(Color.DKGRAY, "#FFEB3B", R.string.feedback_ok, mTotalScore, true);
-                mOkCount++;
-                mGoodCount = 0;
+                updateFeedbackUI(Color.DKGRAY, "#FFEB3B", R.string.feedback_ok, mScoreHandler.getCurrentScore(), true);
+                mScoreHandler.incrementOkCount();
+                mScoreHandler.setCurrentStreak(0);
             } else {
-                updateFeedbackUI(Color.DKGRAY, "#4CAF50", R.string.feedback_good, (int) (2-mAccelerationValue) * 10, false);
-                mGoodCount++;
+                updateFeedbackUI(Color.DKGRAY, "#4CAF50", R.string.feedback_good, 10, false);
+                mScoreHandler.incrementGoodCount();
+                mScoreHandler.incrementCurrentStreak();
 
-                if (mGoodCount >= 20 && !voiceFeedbackIsTimedOut) {
+                if (mScoreHandler.getCurrentStreak() >= 20 && !voiceFeedbackIsTimedOut) {
                     mMPGood.start();
-                    mGoodCount = 0;
+                    mScoreHandler.setCurrentStreak(0);
                     voiceFeedbackTimeout();
                     voiceFeedbackIsTimedOut = true;
                 }
@@ -193,17 +193,14 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
         // Dont change score at ok screen
 
         if (!feedbackOk) {
-            mTotalScore += scoreChange;
-            if (mTotalScore < 0) {
-                mTotalScore = 0;
-            }
+            mScoreHandler.setCurrentScore(mScoreHandler.getCurrentScore() + scoreChange);
         }
 
-        mAccelerationValueTextView.setTextColor(textColor);
+        mCurrentScoreTextView.setTextColor(textColor);
         mAccelerationFeedbackTextView.setTextColor(textColor);
         findViewById(R.id.navigation_layout).setBackgroundColor(Color.parseColor(backgroundColor));
         mAccelerationFeedbackTextView.setText(getString(feedbackString));
-        mAccelerationValueTextView.setText(Double.toString(mTotalScore));
+        mCurrentScoreTextView.setText(Double.toString(mScoreHandler.getCurrentScore()));
 
     }
 
@@ -284,7 +281,6 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
         endLocation.setLongitude(12.285821);
 
         float distanceInMeters = endLocation.distanceTo(startLocation);
-        int mTotalCount = mBadCount + mOkCount + mGoodCount;
 
         Calendar calender = Calendar.getInstance();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -293,7 +289,7 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
         // Fetch route from map fragment
         ArrayList<LatLngSerializedObject> mRoute = mapFragment.getRoute();
 
-        Session session = new Session(0, 58.36014, 12.344412, 58.283489, 12.285821, distanceInMeters, mTotalCount, mBadCount, mOkCount, mGoodCount, stringDate, mScores, mRoute);
+        Session session = new Session(0, 58.36014, 12.344412, 58.283489, 12.285821, distanceInMeters, mScoreHandler.getHighScore(), mScoreHandler.getCurrentScore(), mScoreHandler.getHigestStreak(), mScoreHandler.getBadCount(), mScoreHandler.getOkCount(), mScoreHandler.getGoodCount(), stringDate, mScores, mRoute);
 
         try {
             // Save current session to sessions
@@ -306,7 +302,7 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
 
         Intent i = new Intent(getApplicationContext(), DetailedStatsActivity.class);
         i.putExtra("DATE", session.getDate());
-        i.putExtra("SCORE", session.getTotalPoints());
+        i.putExtra("SCORE", session.getCurrentScore());
         i.putExtra("ALL_SCORES", mScores);
         i.putExtra("ROUTE", mRoute);
         startActivity(i);
@@ -320,7 +316,8 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
     }
 
     public void resetData() {
-        mBadCount = mOkCount = mGoodCount = mCounter = mTotalScore = 0;
+        mCounter = 0;
+        mScoreHandler.resetScores();
         mScores = new HashMap<>();
     }
 
@@ -340,11 +337,11 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
     }
 
     public void resetUI() {
-        mAccelerationValueTextView.setTextColor(Color.DKGRAY);
+        mCurrentScoreTextView.setTextColor(Color.DKGRAY);
         mAccelerationFeedbackTextView.setTextColor(Color.DKGRAY);
         findViewById(R.id.navigation_layout).setBackgroundColor(Color.parseColor("#4CAF50"));
         mAccelerationFeedbackTextView.setText(getString(R.string.navigation_feedback_start));
-        mAccelerationValueTextView.setText("0.0");
+        mCurrentScoreTextView.setText("0.0");
         mSessionButton.setText(getString(R.string.start_button));
     }
 

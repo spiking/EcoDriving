@@ -52,8 +52,12 @@ public class DetailedStatsActivity extends AppCompatActivity {
         mSeries = new LineGraphSeries<>(mValues);
         mSeries.setThickness(15);
         mSeries.setColor(Color.parseColor("#4CAF50"));
+/*        GridLabelRenderer gridLabel = graph.getGridLabelRenderer();
+        gridLabel.setHorizontalAxisTitle("Counter");
+        gridLabel.setVerticalAxisTitle("Score");*/
         graph.addSeries(mSeries);
         graph.getViewport().setScalable(true);
+
 
         // Add route to map view
         mHandler.postDelayed(runnable, 1000);
@@ -69,11 +73,15 @@ public class DetailedStatsActivity extends AppCompatActivity {
         @Override
         public void run() {
             mapFragment.drawRoute(mRoute);
-           /* handler.postDelayed(this, 100);*/
         }
     };
 
     public void addGraphData() {
+
+        if (mScores == null || mScores.isEmpty()) {
+            return;
+        }
+
         mScores.put(0, 0);
         mValues = new DataPoint[mScores.size()-1];
         System.out.println(mValues.length);

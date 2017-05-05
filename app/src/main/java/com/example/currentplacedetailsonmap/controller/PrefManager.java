@@ -1,4 +1,4 @@
-package com.example.currentplacedetailsonmap.activities;
+package com.example.currentplacedetailsonmap.controller;
 
 /**
  * Created by Pontus on 2017-04-27.
@@ -8,16 +8,16 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 public class PrefManager {
-    SharedPreferences pref;
-    SharedPreferences.Editor editor;
-    Context _context;
 
-    // shared pref mode
+    private SharedPreferences pref;
+    private SharedPreferences.Editor editor;
+    private Context _context;
+
+    // Shared pref mode
     int PRIVATE_MODE = 0;
 
     // Shared preferences file name
     private static final String PREF_NAME = "pref-welcome";
-
     private static final String IS_FIRST_TIME_LAUNCH = "IsFirstTimeLaunch";
 
     public PrefManager(Context context) {

@@ -20,6 +20,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.example.currentplacedetailsonmap.R;
+import com.example.currentplacedetailsonmap.controller.PrefManager;
 
 public class WelcomeSlidesActivity extends AppCompatActivity {
 
