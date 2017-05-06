@@ -1,7 +1,9 @@
 package com.example.currentplacedetailsonmap.activities;
 
+import android.Manifest;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -9,10 +11,13 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.location.Location;
 import android.media.MediaPlayer;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.speech.RecognizerIntent;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -29,6 +34,7 @@ import com.example.currentplacedetailsonmap.models.Session;
 import com.example.currentplacedetailsonmap.services.DataService;
 import com.squareup.seismic.ShakeDetector;
 
+import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -37,6 +43,8 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import edu.cmu.pocketsphinx.Assets;
 
 
 public class NavigationActivity extends AppCompatActivity implements SensorEventListener, ShakeDetector.Listener {
@@ -81,6 +89,12 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
     // Fragment
     private MapFragment mapFragment;
 
+    //Voice
+    private VoiceRecognition voiceRec;
+
+    /* Used to handle permission request */
+    private static final int PERMISSIONS_REQUEST_RECORD_AUDIO = 1;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -119,6 +133,18 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
         FragmentManager manager = getSupportFragmentManager();
         mapFragment = (MapFragment) manager.findFragmentById(R.id.map_fragment);
         mapFragment.startRouteNavigation();
+
+        // Check if user has given permission to record audio
+        int permissionCheck = ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.RECORD_AUDIO);
+        if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, PERMISSIONS_REQUEST_RECORD_AUDIO);
+            return;
+        }
+
+        View[] voiceViews = new View[1];
+        voiceViews[0] = findViewById(R.id.voice_result_2);
+        voiceRec = new VoiceRecognition(getApplicationContext(), voiceViews, "stop", mSessionButton);
+        runRecognizerSetup();
     }
 
     public void startUITimer() {
@@ -404,6 +430,50 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
                 break;
             }
 
+        }
+    }
+
+    /**** Voice Recognition ****/
+
+    private void runRecognizerSetup() {
+        // Recognizer initialization is a time-consuming and it involves IO,
+        // so we execute it in async task
+        new AsyncTask<Void, Void, Exception>() {
+            @Override
+            protected Exception doInBackground(Void... params) {
+                try {
+                    Assets assets = new Assets(NavigationActivity.this);
+                    File assetDir = assets.syncAssets();
+                    voiceRec.setupRecognizer(assetDir);
+                } catch (IOException e) {
+                    return e;
+                }
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Exception result) {
+                if (result != null) {
+                    ((TextView) findViewById(R.id.voice_result))
+                            .setText("Failed to init recognizer " + result);
+                } else {
+                    voiceRec.switchSearch("wakeup"); //Speaking to wake up the recognizer
+                }
+            }
+        }.execute();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == PERMISSIONS_REQUEST_RECORD_AUDIO) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                runRecognizerSetup();
+            } else {
+                voiceRec.cancelVoiceDetection();
+            }
         }
     }
 }

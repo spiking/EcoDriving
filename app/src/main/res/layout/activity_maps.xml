@@ -15,11 +15,13 @@
         android:background="?attr/colorPrimary"
         android:minHeight="?attr/actionBarSize"
         app:theme="@style/ThemeOverlay.AppCompat.ActionBar"
-        tools:layout_editor_absoluteY="0dp"
         android:layout_marginRight="0dp"
         app:layout_constraintRight_toRightOf="parent"
         android:layout_marginLeft="0dp"
-        app:layout_constraintLeft_toLeftOf="parent" />
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginTop="8dp"
+        app:layout_constraintHorizontal_bias="0.0" />
 
     <fragment
         android:id="@+id/map_fragment"
@@ -61,6 +63,17 @@
         app:layout_constraintGuide_percent="0.5"
         tools:layout_editor_absoluteY="329dp"
         tools:layout_editor_absoluteX="0dp" />
+
+    <TextView
+        android:id="@+id/voice_result"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/map_fragment"
+        android:layout_marginTop="8dp"
+        app:layout_constraintBottom_toBottomOf="@+id/start_button"
+        android:layout_marginBottom="8dp" />
 
 </android.support.constraint.ConstraintLayout>
 

@@ -1,19 +1,25 @@
 package com.example.currentplacedetailsonmap.activities;
 
+import android.Manifest;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.hardware.SensorManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.speech.RecognizerIntent;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.currentplacedetailsonmap.R;
@@ -30,9 +36,16 @@ import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IProfile;
 import com.squareup.seismic.ShakeDetector;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Locale;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Locale;
+
+import edu.cmu.pocketsphinx.Assets;
 
 /**
  * An activity that displays a map showing the place at the device's current location.
@@ -50,6 +63,11 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
     private SensorManager mSensorManager;
     private ShakeDetector shakeDetector;
     private static boolean mMapActivityShowing = true;
+
+    /* Used to handle permission request */
+    private static final int PERMISSIONS_REQUEST_RECORD_AUDIO = 1;
+
+    private VoiceRecognition voiceRec;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,6 +97,18 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
+        // Check if user has given permission to record audio
+        int permissionCheck = ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.RECORD_AUDIO);
+        if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, PERMISSIONS_REQUEST_RECORD_AUDIO);
+            return;
+        }
+
+        View[] voiceViews = new View[1];
+        voiceViews[0] = findViewById(R.id.voice_result);
+        Intent intent = new Intent(getApplicationContext(), NavigationActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        voiceRec = new VoiceRecognition(getApplicationContext(), voiceViews, "start", intent);
+        runRecognizerSetup();
     }
 
 
@@ -164,7 +194,8 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
                         new DividerDrawerItem(),
                         new SecondaryDrawerItem().withIdentifier(2).withName("Statistics"),
                         new SecondaryDrawerItem().withIdentifier(3).withName("Tutorial"),
-                        new SecondaryDrawerItem().withIdentifier(4).withName("Settings")
+                        new SecondaryDrawerItem().withIdentifier(4).withName("Settings"),
+                        new SecondaryDrawerItem().withIdentifier(5).withName("Voice")
                 )
                 .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
                     @Override
@@ -192,6 +223,10 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
                             case 4:
                                 Log.v("ID", id + " was chosen");
                                 loadSettingsView();
+                                break;
+                            case 5:
+                                Log.v("ID", id + " was chosen");
+                                loadVoiceView();
                                 break;
                             default:
                                 break;
@@ -226,6 +261,11 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
 
     public void loadSettingsView() {
         Intent intent = new Intent(this, SettingsActivity.class);
+        startActivity(intent);
+    }
+
+    public void loadVoiceView() {
+        Intent intent = new Intent(this, VoiceRecognitionActivity.class);
         startActivity(intent);
     }
 
@@ -273,5 +313,49 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
                 = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
         return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+    }
+
+    /**** Voice Recognition ****/
+
+    private void runRecognizerSetup() {
+        // Recognizer initialization is a time-consuming and it involves IO,
+        // so we execute it in async task
+        new AsyncTask<Void, Void, Exception>() {
+            @Override
+            protected Exception doInBackground(Void... params) {
+                try {
+                    Assets assets = new Assets(MapsActivityCurrentPlace.this);
+                    File assetDir = assets.syncAssets();
+                    voiceRec.setupRecognizer(assetDir);
+                } catch (IOException e) {
+                    return e;
+                }
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Exception result) {
+                if (result != null) {
+                    ((TextView) findViewById(R.id.voice_result))
+                            .setText("Failed to init recognizer " + result);
+                } else {
+                    voiceRec.switchSearch("wakeup"); //Speaking to wake up the recognizer
+                }
+            }
+        }.execute();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == PERMISSIONS_REQUEST_RECORD_AUDIO) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                runRecognizerSetup();
+            } else {
+                voiceRec.cancelVoiceDetection();
+            }
+        }
     }
 }

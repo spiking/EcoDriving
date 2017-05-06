@@ -35,13 +35,13 @@
     <string name="start">GOT IT</string>
 
     <string name="slide_1_title">Welcome to EcoDriving!</string>
-    <string name="slide_1_desc">This is an introduction to your personal EcoDriving experience. To start of your journey to become a fully fledged Eco Driver, click Next.</string>
+    <string name="slide_1_desc">This is an introduction to your personal EcoDriving experience. To start of your journey to become a fully fledged Eco-driver, swipe or click next.</string>
 
     <string name="slide_2_title">Drive for the environment</string>
     <string name="slide_2_desc">EcoDriving helps you become a more eco-friendly driver! We study your driving habits by continuously update, calculate and monitor your actions to optimize your driving for environmental purposes. </string>
 
     <string name="slide_3_title">Live feedback</string>
-    <string name="slide_3_desc">You can initiate or terminate a driving run by either clicking start/stop or shake your phone and speak "Start" or "Stop". While you are driving your main goal is to keep the green status as much as you can while receiving helpful tips from the app.</string>
+    <string name="slide_3_desc">You can initiate or terminate a driving run by either clicking Start/Stop or shake your phone and speak Start or Stop. While you are driving your main goal is to keep the green status as much as you can while receiving helpful tips from the app.</string>
 
     <string name="slide_4_title">Statistics</string>
     <string name="slide_4_desc">EcoDriving always keep track of your progress so that you can improve your driving habits. Compare your statistics from previous routes and receive concrete facts on how you are performing and what you can improve on!</string>
@@ -51,4 +51,11 @@
 
     <string name="play_again_desc">To see the welcome slider again, goto Settings -> apps -> welcome slider -> clear data</string>
     <string name="play_again">Play Again</string>
+
+    <!--Voice Recognition Activity -->
+
+    <string name="kws_caption">To start demonstration say \"hello eco\".</string>
+    <string name="menu_caption">Eco heard you. Say "Start" or "Stop".</string>
+    <string name="start_caption">You said "Start". Say \"tree\" to get back to menu.</string>
+    <string name="stop_caption">You said "Stop". Say \"cat\" to get back to menu.</string>
 </resources>
