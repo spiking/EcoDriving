@@ -169,10 +169,9 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
         @Override
         public void run() {
 
-            Log.v("Counter", "RUNNING! " + mCounter++);
-            isRunning = true;
+            // Log.v("Counter", "RUNNING! " + mCounter++);
 
-            mScores.put(mCounter, mScoreHandler.getCurrentScore());
+            mScores.put(mCounter++, mScoreHandler.getCurrentScore());
             System.out.println("COUNTER = " + mCounter + " VALUE = " + mScoreHandler.getCurrentScore());
 
             if (mAccelerationValue > 10) {
@@ -181,8 +180,6 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
 
             // Not showing this value
             /* double roundedAccelerationValue = Math.abs(Math.round(mAccelerationValue * 100.0) / 100.0); */
-
-            /* System.out.println(mAccelerationValue); */
 
             if (mAccelerationValue > 4) {
                 updateFeedbackUI(Color.WHITE, "#F44336", R.string.feedback_bad, (int) (-mAccelerationValue * 10), false);
@@ -220,6 +217,10 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
 
         if (!feedbackOk) {
             mScoreHandler.setCurrentScore(mScoreHandler.getCurrentScore() + scoreChange);
+        }
+
+        if (!isRunning) {
+            return;
         }
 
         mCurrentScoreTextView.setTextColor(textColor);
@@ -263,6 +264,8 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
             mTimer.purge();
             mTimerTask.cancel();
         }
+
+        isRunning = false;
     }
 
     @Override
@@ -333,8 +336,6 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
         i.putExtra("ROUTE", mRoute);
         startActivity(i);
 
-        System.out.println(mScores);
-
         mTimer.cancel();
         mTimer.purge();
         mTimerTask.cancel();
@@ -355,7 +356,6 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
             saveSession();
             isRunning = false;
         } else {
-            System.out.println("START SESSION!");
             startSession();
             mapFragment.startRouteNavigation();
             isRunning = true;

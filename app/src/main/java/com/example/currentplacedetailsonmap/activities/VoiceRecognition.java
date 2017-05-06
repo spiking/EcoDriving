@@ -40,14 +40,12 @@ import android.widget.Toast;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
 
 import edu.cmu.pocketsphinx.Hypothesis;
 import edu.cmu.pocketsphinx.RecognitionListener;
 import edu.cmu.pocketsphinx.SpeechRecognizer;
 import edu.cmu.pocketsphinx.SpeechRecognizerSetup;
 
-import static android.R.attr.key;
 import static android.widget.Toast.makeText;
 
 public class VoiceRecognition implements
@@ -69,7 +67,7 @@ public class VoiceRecognition implements
     private Button finishedButton;
 
     //Constructor for starting activity
-    public VoiceRecognition(Context context, View[] views, String KEYPHRASE, Intent newIntent){
+    public VoiceRecognition(Context context, View[] views, String KEYPHRASE, Intent newIntent) {
         this.KEYPHRASE = KEYPHRASE;
         this.context = context;
         this.views = views;
@@ -78,7 +76,7 @@ public class VoiceRecognition implements
     }
 
     //Constructor for stopping activity
-    public VoiceRecognition(Context context, View[] views, String KEYPHRASE, Button finishedButton){
+    public VoiceRecognition(Context context, View[] views, String KEYPHRASE, Button finishedButton) {
         this.KEYPHRASE = KEYPHRASE;
         this.context = context;
         this.views = views;
@@ -130,18 +128,19 @@ public class VoiceRecognition implements
         ((TextView) views[0]).setText("");
         if (hypothesis != null) {
 
-            if(KEYPHRASE.equals("stop"))
+            if (KEYPHRASE.equals("stop"))
                 makeText(context, "You " + text + "ped EcoDriving", Toast.LENGTH_SHORT).show();
             else
                 makeText(context, "You " + text + "ed EcoDriving", Toast.LENGTH_SHORT).show();
 
-            //Starts new intent when on recognizer partial result
-            if(text.equals(KEYPHRASE)){
+            // Starts new intent when on recognizer partial result
+
+            if (text.equals(KEYPHRASE)) {
                 cancelVoiceDetection();
 
-                if(finishedButton != null){
+                if (finishedButton != null) {
                     finishedButton.performClick();
-                }else {
+                } else {
                     context.startActivity(newIntent);
                 }
             }
@@ -157,18 +156,18 @@ public class VoiceRecognition implements
         if (hypothesis != null) {
             String text = hypothesis.getHypstr();
 
-            if(KEYPHRASE.equals("stop"))
+            if (KEYPHRASE.equals("stop"))
                 makeText(context, "You " + text + "ped EcoDriving", Toast.LENGTH_SHORT).show();
             else
                 makeText(context, "You " + text + "ed EcoDriving", Toast.LENGTH_SHORT).show();
 
             //Starts new intent when recognizer closes on result
-            if(text.equals(KEYPHRASE)){
+            if (text.equals(KEYPHRASE)) {
                 cancelVoiceDetection();
 
-                if(finishedButton != null){
+                if (finishedButton != null) {
                     finishedButton.performClick();
-                }else {
+                } else {
                     context.startActivity(newIntent);
                 }
             }

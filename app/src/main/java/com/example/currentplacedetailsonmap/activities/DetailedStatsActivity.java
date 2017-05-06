@@ -36,7 +36,7 @@ public class DetailedStatsActivity extends AppCompatActivity {
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        Bundle extras =  getIntent().getExtras();
+        Bundle extras = getIntent().getExtras();
 
         if (extras != null) {
             String date = extras.getString("DATE");
@@ -52,15 +52,13 @@ public class DetailedStatsActivity extends AppCompatActivity {
         mSeries = new LineGraphSeries<>(mValues);
         mSeries.setThickness(15);
         mSeries.setColor(Color.parseColor("#4CAF50"));
-/*        GridLabelRenderer gridLabel = graph.getGridLabelRenderer();
-        gridLabel.setHorizontalAxisTitle("Counter");
-        gridLabel.setVerticalAxisTitle("Score");*/
-
         graph.addSeries(mSeries);
+        //GridLabelRenderer gridLabel = graph.getGridLabelRenderer();
+        //gridLabel.setHorizontalAxisTitle("Counter");
+        //gridLabel.setVerticalAxisTitle("Score");
         //graph.getViewport().setScalable(true);
-
-/*        graph.getViewport().setMaxX(mScores.size());
-        graph.getViewport().setXAxisBoundsManual(true);*/
+        //graph.getViewport().setMaxX(mScores.size());
+        //graph.getViewport().setXAxisBoundsManual(true);
 
         // Add route to map view
         mHandler.postDelayed(runnable, 1000);
@@ -86,10 +84,9 @@ public class DetailedStatsActivity extends AppCompatActivity {
         }
 
         mScores.put(0, 0);
-        mValues = new DataPoint[mScores.size()-1];
-        System.out.println(mValues.length);
+        mValues = new DataPoint[mScores.size() - 1];
 
-        for(int i = 0; i < mScores.size()-1; i++) {
+        for (int i = 0; i < mScores.size() - 1; i++) {
             DataPoint dp = new DataPoint(i, mScores.get(i));
             mValues[i] = dp;
         }

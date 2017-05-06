@@ -125,7 +125,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
         mMapView = (MapView) rootView.findViewById(R.id.mapView);
         mMapView.onCreate(savedInstanceState);
 
-        mMapView.onResume(); // needed to get the map to display immediately
+        mMapView.onResume(); // Needed to get the map to display immediately
 
         try {
             MapsInitializer.initialize(getActivity().getApplicationContext());
@@ -164,18 +164,16 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
         }
 
         Location currentLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-        Log.v("ROUTING", "Adding new data point");
-        Log.v("ROUTING_LONG", Double.toString(currentLocation.getLongitude()));
-        Log.v("ROUTING_LAT", Double.toString(currentLocation.getLatitude()));
 
-        mPoints.add(new LatLngSerializedObject(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude())));
+        if (currentLocation != null) {
+            mPoints.add(new LatLngSerializedObject(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude())));
+        }
+
     }
 
     // Not in use
 
     public void drawRoute(ArrayList<LatLngSerializedObject> route) {
-
-        System.out.println("Draw route!");
 
         mMap.clear();
 
@@ -240,14 +238,14 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
     @Override
     public void onResume() {
         super.onResume();
-        System.out.println("ON RESUME");
+        System.out.println("ON RESUME - MAP FRAGMENT");
         mMapView.onResume();
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        System.out.println("ON PAUSE");
+        System.out.println("ON PAUSE - MAP FRAGMENT");
         mMapView.onPause();
         routeHandler.removeCallbacks(runnable);
     }
@@ -286,6 +284,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
      */
     @Override
     public void onMapReady(GoogleMap map) {
+
+        System.out.println("SETUP MAP");
 
         mMap = map;
         // map is a GoogleMap object
@@ -367,8 +367,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
             }
         });
 
-       /* addSampleRoute();*/
-
+       // addSampleRoute();
     }
 
 
@@ -495,6 +494,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
         System.out.println("UPDATE LOCATION UI");
 
         if (mMap == null) {
+            System.out.println("mMAP IS NULL");
             return;
         }
 
