@@ -41,10 +41,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Locale;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Locale;
-
 import edu.cmu.pocketsphinx.Assets;
 
 /**
@@ -190,7 +186,7 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
                 .withAccountHeader(headerResult)
                 .withDrawerLayout(R.layout.material_drawer_fits_not)
                 .addDrawerItems(
-                        new PrimaryDrawerItem().withIdentifier(1).withName("Example@ecodriving.com").withBadge("1").withBadgeStyle(new BadgeStyle().withTextColor(Color.WHITE).withColorRes(R.color.md_red_700)),
+                        new PrimaryDrawerItem().withIdentifier(1).withName("Account Name").withBadgeStyle(new BadgeStyle().withTextColor(Color.WHITE).withColorRes(R.color.md_red_700)),
                         new DividerDrawerItem(),
                         new SecondaryDrawerItem().withIdentifier(2).withName("Statistics"),
                         new SecondaryDrawerItem().withIdentifier(3).withName("Tutorial"),
@@ -238,7 +234,7 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
                 })
                 .build();
 
-        mDrawer.addStickyFooterItem(new PrimaryDrawerItem().withName("EcoDriving Inc."));
+        mDrawer.addStickyFooterItem(new PrimaryDrawerItem().withName("Eco Driving Inc."));
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
     }

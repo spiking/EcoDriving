@@ -55,9 +55,12 @@ public class DetailedStatsActivity extends AppCompatActivity {
 /*        GridLabelRenderer gridLabel = graph.getGridLabelRenderer();
         gridLabel.setHorizontalAxisTitle("Counter");
         gridLabel.setVerticalAxisTitle("Score");*/
-        graph.addSeries(mSeries);
-        graph.getViewport().setScalable(true);
 
+        graph.addSeries(mSeries);
+        //graph.getViewport().setScalable(true);
+
+/*        graph.getViewport().setMaxX(mScores.size());
+        graph.getViewport().setXAxisBoundsManual(true);*/
 
         // Add route to map view
         mHandler.postDelayed(runnable, 1000);

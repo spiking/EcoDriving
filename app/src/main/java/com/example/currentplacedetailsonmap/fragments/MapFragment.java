@@ -308,7 +308,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
         getDeviceLocation();
 
         // Style map to styles defined in json file
-        styleMap();
+        // styleMap();
 
         // Setting onclick event listener for the map
         mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {

@@ -18,13 +18,14 @@ public class SessionsViewHolder extends RecyclerView.ViewHolder {
 
     public SessionsViewHolder(View itemView) {
         super(itemView);
-        sessionDate = (TextView) itemView.findViewById(R.id.session_date);
         sessionScore = (TextView) itemView.findViewById(R.id.session_score);
+        sessionDate = (TextView) itemView.findViewById(R.id.session_date);
+
     }
 
     public void updateUI(Session session) {
+        sessionScore.setText(Integer.toString(session.getCurrentScore()) + " poäng");
         sessionDate.setText(session.getDate());
-        sessionScore.setText(Integer.toString(session.getCurrentScore()));
     }
 }
 
