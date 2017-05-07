@@ -58,4 +58,7 @@
     <string name="menu_caption">Eco heard you. Say "Start" or "Stop".</string>
     <string name="start_caption">You said "Start". Say \"tree\" to get back to menu.</string>
     <string name="stop_caption">You said "Stop". Say \"cat\" to get back to menu.</string>
+
+    <!-- Settings -->
+
 </resources>

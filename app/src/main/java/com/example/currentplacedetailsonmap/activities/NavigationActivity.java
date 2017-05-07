@@ -143,7 +143,7 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
 
         View[] voiceViews = new View[1];
         voiceViews[0] = findViewById(R.id.voice_result_2);
-        voiceRec = new VoiceRecognition(getApplicationContext(), voiceViews, "stop", mSessionButton);
+        voiceRec = new VoiceRecognition(getApplicationContext(), voiceViews, "cancel trip", mSessionButton);
         runRecognizerSetup();
     }
 

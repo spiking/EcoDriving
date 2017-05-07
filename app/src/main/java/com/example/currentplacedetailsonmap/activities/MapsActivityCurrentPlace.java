@@ -103,7 +103,7 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
         View[] voiceViews = new View[1];
         voiceViews[0] = findViewById(R.id.voice_result);
         Intent intent = new Intent(getApplicationContext(), NavigationActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        voiceRec = new VoiceRecognition(getApplicationContext(), voiceViews, "start", intent);
+        voiceRec = new VoiceRecognition(getApplicationContext(), voiceViews, "start new trip", intent);
         runRecognizerSetup();
     }
 
