@@ -10,6 +10,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 /**
  * Created by Atlas on 2017-04-05.
@@ -26,6 +28,8 @@ public class DataService {
     }
 
     private static ArrayList<Session> sessions = new ArrayList<>();
+
+    public String mMapColor = "LIGHT";
 
     private DataService() {
 
@@ -54,7 +58,20 @@ public class DataService {
     }
 
     public static ArrayList<Session> getAllSessions() {
+        Collections.sort(sessions, new Comparator<Session>(){
+            public int compare(Session s1, Session s2) {
+                return s2.getDate().compareToIgnoreCase(s1.getDate());
+            }
+        });
+
         return sessions;
     }
 
+    public String getMapColor() {
+        return mMapColor;
+    }
+
+    public void setMapColorDark(String mMapColor) {
+        this.mMapColor = mMapColor;
+    }
 }

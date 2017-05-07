@@ -85,10 +85,10 @@ public class VoiceRecognition implements
     }
 
     public void cancelVoiceDetection() {
+
         if (recognizer != null) {
             recognizer.cancel();
             recognizer.shutdown();
-            Log.v("VOICE", "Stopped listening for voice");
         }
     }
 
@@ -103,19 +103,28 @@ public class VoiceRecognition implements
             return;
 
         String text = hypothesis.getHypstr();
-        Log.v("VOICE", "Captured: " + text);
+        Log.v("VOICE", "Captured partial: " + text);
+
+        cancelVoiceDetection();
 
         ((TextView) views[0]).setText("");
         if (hypothesis != null) {
 
+            if (KEYPHRASE.equals("cancel trip"))
+                makeText(context, "You stopped EcoDriving", Toast.LENGTH_SHORT).show();
+            else
+                makeText(context, "You started Ecodriving", Toast.LENGTH_SHORT).show();
+
+            // Starts new intent when on recognizer partial result
+
             if (text.equals(KEYPHRASE)) {
-                recognizer.stop();
-                /*
+                cancelVoiceDetection();
+
                 if (finishedButton != null) {
                     finishedButton.performClick();
                 } else {
                     context.startActivity(newIntent);
-                }*/
+                }
             }
         }
     }
@@ -129,15 +138,17 @@ public class VoiceRecognition implements
         if (hypothesis != null) {
             String text = hypothesis.getHypstr();
 
+            Log.v("VOICE", "Captured onResult: " + text);
+
             if (KEYPHRASE.equals("cancel trip"))
                 makeText(context, "You stopped EcoDriving", Toast.LENGTH_SHORT).show();
             else
                 makeText(context, "You started Ecodriving", Toast.LENGTH_SHORT).show();
 
+            //Starts new intent when recognizer closes on result
             if (text.equals(KEYPHRASE)) {
                 cancelVoiceDetection();
 
-                //Triggers new Intent in NavigationActivity or starts new intent for MapCurrent
                 if (finishedButton != null) {
                     finishedButton.performClick();
                 } else {
@@ -169,6 +180,8 @@ public class VoiceRecognition implements
         else
             recognizer.startListening(searchName, 10000);
 
+        /*String caption = getResources().getString(captions.get(searchName));
+        ((TextView) findViewById(R.id.caption_text)).setText(caption);*/
     }
 
     public void setupRecognizer(File assetsDir) throws IOException {
@@ -190,6 +203,19 @@ public class VoiceRecognition implements
 
         // Create keyword-activation search.
         recognizer.addKeyphraseSearch(KWS_SEARCH, KEYPHRASE);
+
+        /*
+        // Create grammar-based search for digit recognition
+        File menuGrammar = new File(assetsDir, "menu.gram");
+        recognizer.addGrammarSearch(MENU_SEARCH, menuGrammar);
+
+        // Create grammar-based search for digit recognition
+        File startGrammar = new File(assetsDir, "driver.gram");
+        recognizer.addGrammarSearch(START_SEARCH, startGrammar);
+
+        // Create grammar-based search for digit recognition
+        File stopGrammar = new File(assetsDir, "driver.gram");
+        recognizer.addGrammarSearch(STOP_SEARCH, stopGrammar);*/
     }
 
     @Override

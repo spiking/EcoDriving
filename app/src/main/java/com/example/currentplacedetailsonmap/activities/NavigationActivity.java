@@ -252,6 +252,15 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
         if(isRunning && voiceInput) {
             voiceInput = false;
         }
+
+        if (voiceRec != null) {
+            Log.v("VOICE", "NOT NULL");
+            // runRecognizerSetup();
+        } else {
+            Log.v("VOICE", "NULL");
+        }
+
+        Log.v("VOICE", "RESUME");
     }
 
     @Override
@@ -266,6 +275,8 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
         }
 
         isRunning = false;
+
+        Log.v("VOICE", "PAUSE");
     }
 
     @Override
@@ -438,6 +449,7 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
     private void runRecognizerSetup() {
         // Recognizer initialization is a time-consuming and it involves IO,
         // so we execute it in async task
+
         new AsyncTask<Void, Void, Exception>() {
             @Override
             protected Exception doInBackground(Void... params) {

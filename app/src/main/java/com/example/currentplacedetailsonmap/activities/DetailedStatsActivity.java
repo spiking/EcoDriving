@@ -56,7 +56,7 @@ public class DetailedStatsActivity extends AppCompatActivity {
         //GridLabelRenderer gridLabel = graph.getGridLabelRenderer();
         //gridLabel.setHorizontalAxisTitle("Counter");
         //gridLabel.setVerticalAxisTitle("Score");
-        //graph.getViewport().setScalable(true);
+        graph.getViewport().setScalable(true);
         //graph.getViewport().setMaxX(mScores.size());
         //graph.getViewport().setXAxisBoundsManual(true);
 

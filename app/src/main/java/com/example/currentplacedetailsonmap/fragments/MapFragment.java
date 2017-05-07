@@ -26,6 +26,7 @@ import com.example.currentplacedetailsonmap.R;
 import com.example.currentplacedetailsonmap.activities.DataParser;
 import com.example.currentplacedetailsonmap.activities.MapsActivityCurrentPlace;
 import com.example.currentplacedetailsonmap.models.LatLngSerializedObject;
+import com.example.currentplacedetailsonmap.services.DataService;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
@@ -105,7 +106,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
     // Route
     private List<LatLng> mRoutePoints = new ArrayList<LatLng>();
     private ArrayList<LatLng> mMarkerPoints;
-    private ArrayList<LatLngSerializedObject> mPoints; //added
+    private ArrayList<LatLngSerializedObject> mPoints;
     private Polyline mLine;
     private Handler routeHandler = new Handler();
 
@@ -168,7 +169,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
         if (currentLocation != null) {
             mPoints.add(new LatLngSerializedObject(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude())));
         }
-
     }
 
     // Not in use
@@ -179,22 +179,35 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
 
         PolylineOptions options = new PolylineOptions().width(15).color(Color.parseColor("#2196F3")).geodesic(true);
 
+        double travelDistance = 0;
+
         for (int i = 0; i < route.size(); i++) {
 
             if (i == 0) {
                 // Start marker
                 addMarker(route.get(i).getLatLng(), true);
-            }
-
-            if (i == route.size()-1) {
+            } else if (i == route.size()-1) {
                 // Destination marker
                 addMarker(route.get(i).getLatLng(), false);
+            } else {
+                Location previous = new Location("PREVIOUS");
+                previous.setLatitude(route.get(i).getLatLng().latitude);
+                previous.setLongitude(route.get(i).getLatLng().longitude);
+
+                Location current = new Location("CURRENT");
+                current.setLatitude(route.get(i-1).getLatLng().latitude);
+                current.setLongitude(route.get(i-1).getLatLng().longitude);
+
+                travelDistance += previous.distanceTo(current);
+
             }
 
             LatLng point = route.get(i).getLatLng();
             options.add(point);
 
         }
+
+        Log.v("DISTANCE", Double.toString(travelDistance));
 
         mLine = mMap.addPolyline(options);
     }
@@ -308,7 +321,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
         getDeviceLocation();
 
         // Style map to styles defined in json file
-        // styleMap();
+
+        if (!DataService.getInstance().getMapColor().equals("LIGHT")) {
+            styleMap();
+        }
 
         // Setting onclick event listener for the map
         mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
@@ -367,7 +383,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
             }
         });
 
-       // addSampleRoute();
     }
 
 
