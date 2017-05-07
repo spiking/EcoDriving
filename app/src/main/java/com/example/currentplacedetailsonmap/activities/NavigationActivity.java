@@ -81,6 +81,7 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
     // Running
     private boolean isRunning;
     private boolean voiceInput;
+    private Long mStartTimeStamp;
 
     // Media player
     private MediaPlayer mMPGood;
@@ -124,6 +125,9 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
         isRunning = true;
         voiceInput = false;
         voiceFeedbackIsTimedOut = false;
+
+        mStartTimeStamp = System.currentTimeMillis() / 1000;
+        Log.v("ROUTE", Long.toString(mStartTimeStamp));
 
         // Setup shaking
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
@@ -320,17 +324,16 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
         endLocation.setLatitude(58.283489);
         endLocation.setLongitude(12.285821);
 
-        float distanceInMeters = endLocation.distanceTo(startLocation);
-
         Calendar calender = Calendar.getInstance();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String stringDate = sdf.format(calender.getTime());
 
         // Fetch route from map fragment
         ArrayList<LatLngSerializedObject> mRoute = mapFragment.getRoute();
+        double distance = mapFragment.getTravelDistance();
+        long travelTime = (System.currentTimeMillis() / 1000) - mStartTimeStamp;
 
-        Session session = new Session(0, 58.36014, 12.344412, 58.283489, 12.285821, distanceInMeters, mScoreHandler.getHighScore(), mScoreHandler.getCurrentScore(), mScoreHandler.getHigestStreak(), mScoreHandler.getBadCount(), mScoreHandler.getOkCount(), mScoreHandler.getGoodCount(), stringDate, mScores, mRoute);
-
+        Session session = new Session(0, 58.36014, 12.344412, 58.283489, 12.285821, mScoreHandler.getHighScore(), mScoreHandler.getCurrentScore(), mScoreHandler.getHigestStreak(), mScoreHandler.getBadCount(), mScoreHandler.getOkCount(), mScoreHandler.getGoodCount(), stringDate, mScores, mRoute, distance, travelTime);
         try {
             // Save current session to sessions
             DataService.getInstance().writeSessionToSessions(session);
@@ -345,6 +348,8 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
         i.putExtra("SCORE", session.getCurrentScore());
         i.putExtra("ALL_SCORES", mScores);
         i.putExtra("ROUTE", mRoute);
+        i.putExtra("DISTANCE", session.getTravelDistance());
+        i.putExtra("TRAVEL_TIME", session.getTravelTime());
         startActivity(i);
 
         mTimer.cancel();
@@ -385,6 +390,7 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
     public void startSession() {
         resetData();
         startUITimer();
+        mStartTimeStamp = System.currentTimeMillis() / 1000;
         mSessionButton.setText(getString(R.string.session_button));
     }
 

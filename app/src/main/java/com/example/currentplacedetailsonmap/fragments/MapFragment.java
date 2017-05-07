@@ -109,6 +109,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
     private ArrayList<LatLngSerializedObject> mPoints;
     private Polyline mLine;
     private Handler routeHandler = new Handler();
+    private double mTravelDistance;
 
 
 
@@ -148,6 +149,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
 
         mMarkerPoints = new ArrayList<>();
         mPoints = new ArrayList<>();
+        mTravelDistance = 0;
 
         return rootView;
     }
@@ -171,6 +173,31 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
         }
     }
 
+    public double getTravelDistance() {
+
+        mTravelDistance = 0;
+
+        for (int i = 0; i < mPoints.size(); i++) {
+
+            if (i != 0) {
+                Location previous = new Location("PREVIOUS");
+                previous.setLatitude(mPoints.get(i).getLatLng().latitude);
+                previous.setLongitude(mPoints.get(i).getLatLng().longitude);
+
+                Location current = new Location("CURRENT");
+                current.setLatitude(mPoints.get(i-1).getLatLng().latitude);
+                current.setLongitude(mPoints.get(i-1).getLatLng().longitude);
+
+                mTravelDistance += previous.distanceTo(current);
+            }
+        }
+
+        Log.v("DISTANCE", Double.toString(mTravelDistance));
+
+        return mTravelDistance;
+
+    }
+
     // Not in use
 
     public void drawRoute(ArrayList<LatLngSerializedObject> route) {
@@ -179,27 +206,18 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
 
         PolylineOptions options = new PolylineOptions().width(15).color(Color.parseColor("#2196F3")).geodesic(true);
 
-        double travelDistance = 0;
+        mTravelDistance = 0;
 
         for (int i = 0; i < route.size(); i++) {
 
             if (i == 0) {
                 // Start marker
                 addMarker(route.get(i).getLatLng(), true);
-            } else if (i == route.size()-1) {
+            }
+
+            if (i == route.size()-1) {
                 // Destination marker
                 addMarker(route.get(i).getLatLng(), false);
-            } else {
-                Location previous = new Location("PREVIOUS");
-                previous.setLatitude(route.get(i).getLatLng().latitude);
-                previous.setLongitude(route.get(i).getLatLng().longitude);
-
-                Location current = new Location("CURRENT");
-                current.setLatitude(route.get(i-1).getLatLng().latitude);
-                current.setLongitude(route.get(i-1).getLatLng().longitude);
-
-                travelDistance += previous.distanceTo(current);
-
             }
 
             LatLng point = route.get(i).getLatLng();
@@ -207,7 +225,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
 
         }
 
-        Log.v("DISTANCE", Double.toString(travelDistance));
+        Log.v("DISTANCE", Double.toString(mTravelDistance));
 
         mLine = mMap.addPolyline(options);
     }
@@ -382,7 +400,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
 
             }
         });
-
     }
 
 

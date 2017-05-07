@@ -88,6 +88,7 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
 
         try {
             DataService.getInstance().readSessionsFromDatabase("DATABASE");
+            DataService.getInstance().readMapColorTypeFromDatabase("MAP_COLOR");
         } catch (IOException e) {
             e.printStackTrace();
         } catch (ClassNotFoundException e) {

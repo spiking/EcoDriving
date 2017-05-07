@@ -10,6 +10,8 @@ import android.widget.TextView;
 import com.example.currentplacedetailsonmap.R;
 import com.example.currentplacedetailsonmap.services.DataService;
 
+import java.io.IOException;
+
 public class SettingsActivity extends AppCompatActivity {
 
     private Toolbar mToolbar;
@@ -40,14 +42,20 @@ public class SettingsActivity extends AppCompatActivity {
             public void onClick(View v) {
                 // TODO Auto-generated method stub
 
-                // mToggleButton.toggle();
-
                 if(mSwitch.isChecked()) {
                     System.out.println("CHECKED");
-                    DataService.getInstance().setMapColorDark("DARK");
+                    try {
+                        DataService.getInstance().setMapColorDark("DARK");
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 } else {
                     System.out.println("NOT CHECKED");
-                    DataService.getInstance().setMapColorDark("LIGHT");
+                    try {
+                        DataService.getInstance().setMapColorDark("LIGHT");
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         });

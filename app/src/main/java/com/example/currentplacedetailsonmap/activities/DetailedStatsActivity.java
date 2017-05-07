@@ -7,6 +7,7 @@ import android.os.Handler;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.widget.TextView;
 
 import com.example.currentplacedetailsonmap.R;
 import com.example.currentplacedetailsonmap.fragments.MapFragment;
@@ -18,6 +19,8 @@ import com.jjoe64.graphview.series.LineGraphSeries;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import static com.example.currentplacedetailsonmap.R.id.stats_distance;
+
 public class DetailedStatsActivity extends AppCompatActivity {
 
     private Toolbar mToolbar;
@@ -26,6 +29,15 @@ public class DetailedStatsActivity extends AppCompatActivity {
     private DataPoint[] mValues;
     private ArrayList<LatLngSerializedObject> mRoute;
     private MapFragment mapFragment;
+    private String mDate;
+    private int mScore;
+    private double mDistance;
+    private long mTime;
+
+    private TextView mScoreTextView;
+    private TextView mDateTextView;
+    private TextView mDistanceTextView;
+    private TextView mTimeTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,15 +48,27 @@ public class DetailedStatsActivity extends AppCompatActivity {
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+
         Bundle extras = getIntent().getExtras();
 
         if (extras != null) {
-            String date = extras.getString("DATE");
-            int score = extras.getInt("SCORE");
+            mDate = extras.getString("DATE");
+            mScore = extras.getInt("SCORE");
+            mDistance = extras.getDouble("DISTANCE");
+            mTime = extras.getLong("TRAVEL_TIME");
             Intent intent = getIntent();
             mScores = (HashMap<Integer, Integer>) intent.getSerializableExtra("ALL_SCORES");
             mRoute = (ArrayList<LatLngSerializedObject>) intent.getSerializableExtra("ROUTE");
         }
+
+        mScoreTextView = (TextView) findViewById(R.id.stats_score);
+        mScoreTextView.setText("Score: " + Integer.toString(mScore));
+        mDateTextView = (TextView) findViewById(R.id.stats_date);
+        mDateTextView.setText("Date: " + mDate);
+        mDistanceTextView = (TextView) findViewById(stats_distance);
+        mDistanceTextView.setText("Distance: " + String.format("%.0f", mDistance) + " m");
+        mTimeTextView = (TextView) findViewById(R.id.stats_time);
+        mTimeTextView.setText("Travel time: " + Long.toString(mTime) + " s");
 
         addGraphData();
 
@@ -53,15 +77,10 @@ public class DetailedStatsActivity extends AppCompatActivity {
         mSeries.setThickness(15);
         mSeries.setColor(Color.parseColor("#4CAF50"));
         graph.addSeries(mSeries);
-        //GridLabelRenderer gridLabel = graph.getGridLabelRenderer();
-        //gridLabel.setHorizontalAxisTitle("Counter");
-        //gridLabel.setVerticalAxisTitle("Score");
         graph.getViewport().setScalable(true);
-        //graph.getViewport().setMaxX(mScores.size());
-        //graph.getViewport().setXAxisBoundsManual(true);
 
         // Add route to map view
-        mHandler.postDelayed(runnable, 1000);
+        mHandler.postDelayed(runnable, 500);
 
         FragmentManager manager = getSupportFragmentManager();
         mapFragment = (MapFragment) manager.findFragmentById(R.id.map_fragment);

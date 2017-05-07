@@ -29,7 +29,7 @@ public class DataService {
 
     private static ArrayList<Session> sessions = new ArrayList<>();
 
-    public String mMapColor = "LIGHT";
+    public static String mMapColor = "LIGHT";
 
     private DataService() {
 
@@ -53,6 +53,23 @@ public class DataService {
         fis.close();
     }
 
+    public static void readMapColorTypeFromDatabase(String fileName) throws IOException, ClassNotFoundException {
+        FileInputStream fis = ApplicationContext.getAppContext().openFileInput(fileName);
+        ObjectInputStream is = new ObjectInputStream(fis);
+        mMapColor = (String) is.readObject();
+        is.close();
+        fis.close();
+    }
+
+    public static void saveMapColorTypeToDatabase(String fileName) throws IOException {
+        FileOutputStream fos = ApplicationContext.getAppContext().openFileOutput(fileName, Context.MODE_PRIVATE);
+        ObjectOutputStream os = new ObjectOutputStream(fos);
+        os.writeObject(mMapColor);
+        os.close();
+        fos.close();
+    }
+
+
     public static void writeSessionToSessions(Session session) {
         sessions.add(session);
     }
@@ -71,7 +88,8 @@ public class DataService {
         return mMapColor;
     }
 
-    public void setMapColorDark(String mMapColor) {
+    public void setMapColorDark(String mMapColor) throws IOException {
         this.mMapColor = mMapColor;
+        saveMapColorTypeToDatabase("MAP_COLOR");
     }
 }

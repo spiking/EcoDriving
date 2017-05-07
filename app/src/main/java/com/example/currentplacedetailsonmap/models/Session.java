@@ -17,7 +17,6 @@ public class Session implements Serializable, Comparable {
     private double startLongitude;
     private double endLatitude;
     private double endLongitude;
-    private double distance;
     private int highScore;
     private int currentScore;
     private int highestStreak;
@@ -25,16 +24,17 @@ public class Session implements Serializable, Comparable {
     private int okPoints;
     private int goodPoints;
     private String date;
+    private double distance;
+    private long time;
     private HashMap<Integer, Integer> allScores;
     private ArrayList<LatLngSerializedObject> route;
 
-    public Session(int id, double startLatitude, double startLongitude, double endLatitude, double endLongitude, double distance, int highScore, int currentScore, int highestStreak, int badPoints, int okPoints, int goodPoints, String date, HashMap<Integer, Integer> allScores, ArrayList<LatLngSerializedObject> route) {
+    public Session(int id, double startLatitude, double startLongitude, double endLatitude, double endLongitude, int highScore, int currentScore, int highestStreak, int badPoints, int okPoints, int goodPoints, String date, HashMap<Integer, Integer> allScores, ArrayList<LatLngSerializedObject> route, double distance, long time) {
         this.id = id;
         this.startLatitude = startLatitude;
         this.startLongitude = startLongitude;
         this.endLatitude = endLatitude;
         this.endLongitude = endLongitude;
-        this.distance = distance;
         this.highScore = highScore;
         this.currentScore = currentScore;
         this.highestStreak = highestStreak;
@@ -44,6 +44,8 @@ public class Session implements Serializable, Comparable {
         this.date = date;
         this.allScores = allScores;
         this.route = route;
+        this.distance = distance;
+        this.time = time;
     }
 
     @Override
@@ -70,4 +72,11 @@ public class Session implements Serializable, Comparable {
         return currentScore;
     }
 
+    public long getTravelTime() {
+        return time;
+    }
+
+    public double getTravelDistance() {
+        return distance;
+    }
 }
