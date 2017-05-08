@@ -1,17 +1,14 @@
 package com.example.currentplacedetailsonmap.activities;
 
 import android.Manifest;
-import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.hardware.SensorManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.speech.RecognizerIntent;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -20,7 +17,6 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.currentplacedetailsonmap.R;
 import com.example.currentplacedetailsonmap.services.DataService;
@@ -34,12 +30,9 @@ import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
 import com.mikepenz.materialdrawer.model.SecondaryDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IProfile;
-import com.squareup.seismic.ShakeDetector;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Locale;
 
 import edu.cmu.pocketsphinx.Assets;
 
@@ -47,18 +40,11 @@ import edu.cmu.pocketsphinx.Assets;
  * An activity that displays a map showing the place at the device's current location.
  */
 
-public class MapsActivityCurrentPlace extends AppCompatActivity
-        implements ShakeDetector.Listener {
+public class MapsActivityCurrentPlace extends AppCompatActivity {
 
     // Side menu and toolbar customization.
     private Toolbar mToolbar;
     private Drawer mDrawer;
-
-    // Speech
-    private final int REQ_CODE_SPEECH_INPUT = 100;
-    private SensorManager mSensorManager;
-    private ShakeDetector shakeDetector;
-    private static boolean mMapActivityShowing = true;
 
     /* Used to handle permission request */
     private static final int PERMISSIONS_REQUEST_RECORD_AUDIO = 1;
@@ -78,11 +64,6 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
         setSupportActionBar(mToolbar);
         // Setup side menu
         setupNavigationMenu();
-
-        // Setup shaking
-        mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-        shakeDetector = new ShakeDetector(this);
-        shakeDetector.start(mSensorManager);
 
         // Load cached data into temporary storage
 
@@ -106,68 +87,6 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
         Intent intent = new Intent(getApplicationContext(), NavigationActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         voiceRec = new VoiceRecognition(getApplicationContext(), voiceViews, "start new trip", intent);
         runRecognizerSetup();
-    }
-
-
-    /**
-     * Shake phone to get speech input
-     */
-    public void hearShake() {
-        promptSpeechInput();
-    }
-
-    /**
-     * Showing google speech input dialog, shake to show
-     */
-    private void promptSpeechInput() {
-        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
-        intent.putExtra(RecognizerIntent.EXTRA_PROMPT,
-                getString(R.string.speech_prompt));
-
-        if (!mMapActivityShowing) {
-            return;
-        }
-
-        try {
-            startActivityForResult(intent, REQ_CODE_SPEECH_INPUT);
-        } catch (ActivityNotFoundException a) {
-            Toast.makeText(getApplicationContext(),
-                    getString(R.string.speech_not_supported),
-                    Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    /**
-     * Receiving speech input, say "start" to begin navigation
-     */
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        switch (requestCode) {
-            case REQ_CODE_SPEECH_INPUT: {
-                if (resultCode == RESULT_OK && null != data) {
-                    ArrayList<String> result = data
-                            .getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-                    if (result.get(0).toString().equalsIgnoreCase("start")) {
-                        Intent intent = new Intent(this, NavigationActivity.class);
-
-                        //Kills the recognizer before starting NavigationActivity
-                        voiceRec.cancelVoiceDetection();
-
-                        startActivity(intent);
-                    } else {
-                        Toast.makeText(this, "Invalid command!", Toast.LENGTH_SHORT).show();
-                    }
-                }
-                break;
-            }
-
-        }
     }
 
     public void setupNavigationMenu() {
@@ -270,19 +189,16 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
     @Override
     public void onResume() {
         super.onResume();
-        mMapActivityShowing = true;
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        mMapActivityShowing = false;
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        mMapActivityShowing = false;
     }
 
     @Override

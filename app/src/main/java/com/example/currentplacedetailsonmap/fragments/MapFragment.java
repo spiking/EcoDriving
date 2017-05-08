@@ -480,8 +480,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
             mLastKnownLocation = LocationServices.FusedLocationApi
                     .getLastLocation(mGoogleApiClient);
             System.out.println("Last known position updated, add to route!");
-            LatLng location = new LatLng(mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude());
-            mRoutePoints.add(location);
+
+            if (mLastKnownLocation != null) {
+                LatLng location = new LatLng(mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude());
+                mRoutePoints.add(location);
+            }
         }
 
         // Set the map's camera position to the current location of the device.

@@ -16,8 +16,6 @@ import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 
-import org.w3c.dom.Text;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -29,6 +27,15 @@ public class DetailedStatsActivity extends AppCompatActivity {
     private DataPoint[] mValues;
     private ArrayList<LatLngSerializedObject> mRoute;
     private MapFragment mapFragment;
+
+    private String mDate;
+    private int mScore;
+    private double mDistance;
+    private long mTime;
+    private TextView mScoreTextView;
+    private TextView mDateTextView;
+    private TextView mDistanceTextView;
+    private TextView mTimeTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,23 +49,25 @@ public class DetailedStatsActivity extends AppCompatActivity {
         Bundle extras = getIntent().getExtras();
 
         if (extras != null) {
-            String date = extras.getString("DATE");
-            //Total score
-            int score = extras.getInt("SCORE");
-            TextView stat1 = (TextView)findViewById(R.id.stat1);
-            stat1.setText("Total score: "+score);
-            //Score per minute
-            long time = extras.getLong("TIME");
-            //long spm = ((long)score/tome); error, both are 0
-            TextView stat2 = (TextView)findViewById(R.id.stat2);
-            stat2.setText("Score per minute: "+time);
-
+            mDate = extras.getString("DATE");
+            mScore = extras.getInt("SCORE");
+            mDistance = extras.getDouble("DISTANCE");
+            mTime = extras.getLong("TRAVEL_TIME");
 
             Intent intent = getIntent();
             mScores = (HashMap<Integer, Integer>) intent.getSerializableExtra("ALL_SCORES");
             mRoute = (ArrayList<LatLngSerializedObject>) intent.getSerializableExtra("ROUTE");
 
         }
+
+        mScoreTextView = (TextView) findViewById(R.id.stats_score);
+        mScoreTextView.setText("Score: " + Integer.toString(mScore));
+        mDateTextView = (TextView) findViewById(R.id.stats_date);
+        mDateTextView.setText("Date: " + mDate);
+        mDistanceTextView = (TextView) findViewById(R.id.stats_distance);
+        mDistanceTextView.setText("Distance: " + String.format("%.0f", mDistance) + " m");
+        mTimeTextView = (TextView) findViewById(R.id.stats_time);
+        mTimeTextView.setText("Travel time: " + Long.toString(mTime) + " s");
 
         addGraphData();
 
@@ -67,15 +76,11 @@ public class DetailedStatsActivity extends AppCompatActivity {
         mSeries.setThickness(15);
         mSeries.setColor(Color.parseColor("#4CAF50"));
         graph.addSeries(mSeries);
-        //GridLabelRenderer gridLabel = graph.getGridLabelRenderer();
-        //gridLabel.setHorizontalAxisTitle("Counter");
-        //gridLabel.setVerticalAxisTitle("Score");
-        //graph.getViewport().setScalable(true);
-        //graph.getViewport().setMaxX(mScores.size());
-        //graph.getViewport().setXAxisBoundsManual(true);
+        graph.getViewport().setScalable(true);
+
 
         // Add route to map view
-        mHandler.postDelayed(runnable, 1000);
+        mHandler.postDelayed(runnable, 500);
 
         FragmentManager manager = getSupportFragmentManager();
         mapFragment = (MapFragment) manager.findFragmentById(R.id.map_fragment);

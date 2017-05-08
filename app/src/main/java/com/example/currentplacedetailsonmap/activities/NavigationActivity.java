@@ -1,7 +1,6 @@
 package com.example.currentplacedetailsonmap.activities;
 
 import android.Manifest;
-import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -14,7 +13,6 @@ import android.media.MediaPlayer;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.speech.RecognizerIntent;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
@@ -24,7 +22,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.currentplacedetailsonmap.R;
 import com.example.currentplacedetailsonmap.controller.ScoreHandler;
@@ -32,7 +29,6 @@ import com.example.currentplacedetailsonmap.fragments.MapFragment;
 import com.example.currentplacedetailsonmap.models.LatLngSerializedObject;
 import com.example.currentplacedetailsonmap.models.Session;
 import com.example.currentplacedetailsonmap.services.DataService;
-import com.squareup.seismic.ShakeDetector;
 
 import java.io.File;
 import java.io.IOException;
@@ -40,14 +36,13 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import edu.cmu.pocketsphinx.Assets;
 
 
-public class NavigationActivity extends AppCompatActivity implements SensorEventListener, ShakeDetector.Listener {
+public class NavigationActivity extends AppCompatActivity implements SensorEventListener {
 
     // Side menu and toolbar customization.
     private Toolbar mToolbar;
@@ -74,10 +69,6 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
     private HashMap<Integer, Integer> mScores;
     private boolean voiceFeedbackIsTimedOut;
 
-    // Speech
-    private final int REQ_CODE_SPEECH_INPUT = 100;
-    private ShakeDetector shakeDetector;
-
     // Running
     private boolean isRunning;
     private boolean voiceInput;
@@ -89,8 +80,6 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
 
     // Fragment
     private MapFragment mapFragment;
-
-    //
 
     //Voice
     private VoiceRecognition voiceRec;
@@ -130,11 +119,6 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
 
         mStartTimeStamp = System.currentTimeMillis() / 1000;
         Log.v("ROUTE", Long.toString(mStartTimeStamp));
-
-        // Setup shaking
-        mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-        shakeDetector = new ShakeDetector(this);
-        shakeDetector.start(mSensorManager);
 
         FragmentManager manager = getSupportFragmentManager();
         mapFragment = (MapFragment) manager.findFragmentById(R.id.map_fragment);
@@ -335,6 +319,7 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
         long travelTime = (System.currentTimeMillis() / 1000) - mStartTimeStamp;
 
         Session session = new Session(0, 58.36014, 12.344412, 58.283489, 12.285821, mScoreHandler.getHighScore(), mScoreHandler.getCurrentScore(), mScoreHandler.getHigestStreak(), mScoreHandler.getBadCount(), mScoreHandler.getOkCount(), mScoreHandler.getGoodCount(), stringDate, mScores, mRoute, distance, travelTime);
+
         try {
             // Save current session to sessions
             DataService.getInstance().writeSessionToSessions(session);
@@ -404,61 +389,7 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
         mSessionButton.setText(getString(R.string.session_button));
     }
 
-    /**
-     * Shake phone to get speech input
-     */
-    public void hearShake() {
-        promptSpeechInput();
-    }
 
-    /**
-     * Showing google speech input dialog, shake to show
-     */
-    private void promptSpeechInput() {
-        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
-        intent.putExtra(RecognizerIntent.EXTRA_PROMPT,
-                getString(R.string.speech_prompt));
-
-        try {
-            startActivityForResult(intent, REQ_CODE_SPEECH_INPUT);
-            voiceInput = true;
-        } catch (ActivityNotFoundException a) {
-            Toast.makeText(getApplicationContext(),
-                    getString(R.string.speech_not_supported),
-                    Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    /**
-     * Receiving speech input, say "stop" stop navigation
-     */
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        switch (requestCode) {
-            case REQ_CODE_SPEECH_INPUT: {
-                if (resultCode == RESULT_OK && null != data) {
-                    ArrayList<String> result = data
-                            .getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-
-                    System.out.println(result.get(0).toString());
-
-                    if (result.get(0).toString().equalsIgnoreCase("stopp")) {
-                        mSessionButton.performClick();
-                    } else {
-                        Toast.makeText(this, "Invalid command!", Toast.LENGTH_SHORT).show();
-                    }
-                }
-                break;
-            }
-
-        }
-    }
 
     /**** Voice Recognition ****/
 

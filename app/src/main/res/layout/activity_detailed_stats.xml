@@ -37,6 +37,7 @@
             android:textSize="30sp"
             android:text="Score Overview"
             android:layout_marginTop="24dp"
+            android:textColor="@color/cast_expanded_controller_progress_text_color"
             android:layout_gravity="center_horizontal"
             />
 
@@ -52,8 +53,8 @@
             android:id="@+id/graph"
             android:layout_width="match_parent"
             android:layout_height="300dp"
-            android:layout_marginBottom="16dp"
-            android:layout_marginTop="16dp"
+            android:layout_marginBottom="24dp"
+            android:layout_marginTop="24dp"
             android:layout_marginLeft="16dp"
             android:layout_marginRight="16dp"
          />
@@ -64,6 +65,7 @@
         android:textSize="30sp"
         android:text="Summary"
         android:layout_marginTop="24dp"
+            android:textColor="@color/cast_expanded_controller_progress_text_color"
         android:layout_gravity="center_horizontal"
         />
 
@@ -79,10 +81,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="20sp"
-            android:text="ABC"
-            android:id="@+id/stat1"
-            android:layout_marginTop="16dp"
+            android:id="@+id/stats_date"
+            android:layout_marginTop="24dp"
             android:layout_marginLeft="24dp"
+            android:textColor="@color/cast_expanded_controller_progress_text_color"
             android:layout_gravity="left"
             />
 
@@ -90,10 +92,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="20sp"
-            android:text="ABC"
-            android:id="@+id/stat2"
-            android:layout_marginTop="16dp"
+            android:id="@+id/stats_score"
+            android:layout_marginTop="24dp"
             android:layout_marginLeft="24dp"
+            android:textColor="@color/cast_expanded_controller_progress_text_color"
             android:layout_gravity="left"
             />
 
@@ -101,9 +103,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="20sp"
-            android:text="ABC"
-            android:layout_marginTop="16dp"
+            android:id="@+id/stats_distance"
+            android:layout_marginTop="24dp"
             android:layout_marginLeft="24dp"
+            android:textColor="@color/cast_expanded_controller_progress_text_color"
             android:layout_gravity="left"
             />
 
@@ -112,26 +115,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="20sp"
-            android:text="ABC"
-            android:id="@+id/stat3"
-            android:layout_marginTop="16dp"
+            android:id="@+id/stats_time"
+            android:layout_marginTop="24dp"
             android:layout_marginLeft="24dp"
-            android:layout_gravity="left"
-            />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="20sp"
-            android:text="ABC"
-            android:id="@+id/stat4"
-            android:layout_marginTop="16dp"
-            android:layout_marginLeft="24dp"
-            android:layout_marginBottom="16dp"
+            android:layout_marginBottom="24dp"
+            android:textColor="@color/cast_expanded_controller_progress_text_color"
             android:layout_gravity="left"
             />
 
     </LinearLayout>
-
 
 </ScrollView>
