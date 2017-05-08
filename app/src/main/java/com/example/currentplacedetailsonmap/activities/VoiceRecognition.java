@@ -40,6 +40,8 @@ import android.widget.Toast;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.util.Date;
 
 import edu.cmu.pocketsphinx.Hypothesis;
 import edu.cmu.pocketsphinx.RecognitionListener;
@@ -72,7 +74,8 @@ public class VoiceRecognition implements
         this.context = context;
         this.views = views;
         this.newIntent = newIntent;
-        Log.v("VOICE", "VoiceRecognition initiated");
+        String currentDateTimeString = DateFormat.getDateTimeInstance().format(new Date());
+        Log.v("VOICE", "VoiceRecognition initiated at time: " + currentDateTimeString);
     }
 
     //Constructor for stopping activity
@@ -81,12 +84,14 @@ public class VoiceRecognition implements
         this.context = context;
         this.views = views;
         this.finishedButton = finishedButton;
-        Log.v("VOICE", "VoiceRecognition initiated");
+        String currentDateTimeString = DateFormat.getDateTimeInstance().format(new Date());
+        Log.v("VOICE", "VoiceRecognition initiated at time: " + currentDateTimeString);
     }
 
     public void cancelVoiceDetection() {
-
         if (recognizer != null) {
+            String currentDateTimeString = DateFormat.getDateTimeInstance().format(new Date());
+            Log.v("VOICE", "VoiceRecognition destroyed at time: " + currentDateTimeString);
             recognizer.cancel();
             recognizer.shutdown();
         }

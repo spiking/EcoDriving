@@ -81,6 +81,7 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
     // Running
     private boolean isRunning;
     private boolean voiceInput;
+    private Long mStartTimeStamp;
 
     // Media player
     private MediaPlayer mMPGood;
@@ -88,6 +89,8 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
 
     // Fragment
     private MapFragment mapFragment;
+
+    //
 
     //Voice
     private VoiceRecognition voiceRec;
@@ -125,6 +128,9 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
         voiceInput = false;
         voiceFeedbackIsTimedOut = false;
 
+        mStartTimeStamp = System.currentTimeMillis() / 1000;
+        Log.v("ROUTE", Long.toString(mStartTimeStamp));
+
         // Setup shaking
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         shakeDetector = new ShakeDetector(this);
@@ -141,10 +147,9 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
             return;
         }
 
-        View[] voiceViews = new View[1];
-        voiceViews[0] = findViewById(R.id.voice_result_2);
-        voiceRec = new VoiceRecognition(getApplicationContext(), voiceViews, "stop", mSessionButton);
-        runRecognizerSetup();
+        //Creates an object for voice recognition
+        createRecognizer("cancel trip", false);
+
     }
 
     public void startUITimer() {
@@ -252,6 +257,15 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
         if(isRunning && voiceInput) {
             voiceInput = false;
         }
+
+        if (voiceRec != null) {
+            Log.v("VOICE", "NOT NULL");
+            // runRecognizerSetup();
+        } else {
+            Log.v("VOICE", "NULL");
+        }
+
+        Log.v("VOICE", "RESUME");
     }
 
     @Override
@@ -266,6 +280,8 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
         }
 
         isRunning = false;
+
+        Log.v("VOICE", "PAUSE");
     }
 
     @Override
@@ -309,17 +325,16 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
         endLocation.setLatitude(58.283489);
         endLocation.setLongitude(12.285821);
 
-        float distanceInMeters = endLocation.distanceTo(startLocation);
-
         Calendar calender = Calendar.getInstance();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String stringDate = sdf.format(calender.getTime());
 
         // Fetch route from map fragment
         ArrayList<LatLngSerializedObject> mRoute = mapFragment.getRoute();
+        double distance = mapFragment.getTravelDistance();
+        long travelTime = (System.currentTimeMillis() / 1000) - mStartTimeStamp;
 
-        Session session = new Session(0, 58.36014, 12.344412, 58.283489, 12.285821, distanceInMeters, mScoreHandler.getHighScore(), mScoreHandler.getCurrentScore(), mScoreHandler.getHigestStreak(), mScoreHandler.getBadCount(), mScoreHandler.getOkCount(), mScoreHandler.getGoodCount(), stringDate, mScores, mRoute);
-
+        Session session = new Session(0, 58.36014, 12.344412, 58.283489, 12.285821, mScoreHandler.getHighScore(), mScoreHandler.getCurrentScore(), mScoreHandler.getHigestStreak(), mScoreHandler.getBadCount(), mScoreHandler.getOkCount(), mScoreHandler.getGoodCount(), stringDate, mScores, mRoute, distance, travelTime);
         try {
             // Save current session to sessions
             DataService.getInstance().writeSessionToSessions(session);
@@ -329,13 +344,16 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
             e.printStackTrace();
         }
 
+        //Kills the recognizer before ending NavigationActivity
+        voiceRec.cancelVoiceDetection();
+
         Intent i = new Intent(getApplicationContext(), DetailedStatsActivity.class);
         i.putExtra("DATE", session.getDate());
         i.putExtra("SCORE", session.getCurrentScore());
         i.putExtra("ALL_SCORES", mScores);
         i.putExtra("ROUTE", mRoute);
-        //TIME
-        i.putExtra("TIME", session.getTravelTime());
+        i.putExtra("DISTANCE", session.getTravelDistance());
+        i.putExtra("TRAVEL_TIME", session.getTravelTime());
         startActivity(i);
 
         mTimer.cancel();
@@ -360,6 +378,9 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
         } else {
             startSession();
             mapFragment.startRouteNavigation();
+            Log.v("VOICE", "Session btn clicked!");
+            voiceRec.cancelVoiceDetection();
+            createRecognizer("cancel trip", false);
             isRunning = true;
         }
     }
@@ -371,11 +392,15 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
         mAccelerationFeedbackTextView.setText(getString(R.string.navigation_feedback_start));
         mCurrentScoreTextView.setText("0.0");
         mSessionButton.setText(getString(R.string.start_button));
+
+        //Creates an object for voice recognition when returning to new session screen
+        createRecognizer("start new trip", false);
     }
 
     public void startSession() {
         resetData();
         startUITimer();
+        mStartTimeStamp = System.currentTimeMillis() / 1000;
         mSessionButton.setText(getString(R.string.session_button));
     }
 
@@ -440,6 +465,7 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
     private void runRecognizerSetup() {
         // Recognizer initialization is a time-consuming and it involves IO,
         // so we execute it in async task
+
         new AsyncTask<Void, Void, Exception>() {
             @Override
             protected Exception doInBackground(Void... params) {
@@ -464,6 +490,28 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
             }
         }.execute();
     }
+
+    private void createRecognizer(String keyphrase, boolean backToHome){
+        View[] voiceViews = new View[1];
+        voiceViews[0] = findViewById(R.id.voice_result_2);
+        if(backToHome){
+            Intent intent = new Intent(getApplicationContext(), NavigationActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            voiceRec = new VoiceRecognition(getApplicationContext(), voiceViews, keyphrase, intent);
+        }else {
+            voiceRec = new VoiceRecognition(getApplicationContext(), voiceViews, keyphrase, mSessionButton);
+        }
+        runRecognizerSetup();
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        Log.v("VOICE", "back button pressed");
+        voiceRec.cancelVoiceDetection();
+        createRecognizer("start new trip", true);
+        onBackPressed();
+        return true;
+    }
+
 
     @Override
     public void onRequestPermissionsResult(int requestCode,

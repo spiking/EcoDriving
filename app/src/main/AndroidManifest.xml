@@ -66,8 +66,6 @@
                 android:value=".activities.StatsActivity" />
         </activity>
 
-        <activity android:name=".activities.VoiceRecognitionActivity" />
-
     </application>
 
 </manifest>

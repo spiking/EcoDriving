@@ -155,6 +155,10 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
                             .getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
                     if (result.get(0).toString().equalsIgnoreCase("start")) {
                         Intent intent = new Intent(this, NavigationActivity.class);
+
+                        //Kills the recognizer before starting NavigationActivity
+                        voiceRec.cancelVoiceDetection();
+
                         startActivity(intent);
                     } else {
                         Toast.makeText(this, "Invalid command!", Toast.LENGTH_SHORT).show();
@@ -191,8 +195,7 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
                         new DividerDrawerItem(),
                         new SecondaryDrawerItem().withIdentifier(2).withName("Statistics"),
                         new SecondaryDrawerItem().withIdentifier(3).withName("Tutorial"),
-                        new SecondaryDrawerItem().withIdentifier(4).withName("Settings"),
-                        new SecondaryDrawerItem().withIdentifier(5).withName("Voice")
+                        new SecondaryDrawerItem().withIdentifier(4).withName("Settings")
                 )
                 .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
                     @Override
@@ -220,10 +223,6 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
                             case 4:
                                 Log.v("ID", id + " was chosen");
                                 loadSettingsView();
-                                break;
-                            case 5:
-                                Log.v("ID", id + " was chosen");
-                                loadVoiceView();
                                 break;
                             default:
                                 break;
@@ -258,11 +257,6 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
 
     public void loadSettingsView() {
         Intent intent = new Intent(this, SettingsActivity.class);
-        startActivity(intent);
-    }
-
-    public void loadVoiceView() {
-        Intent intent = new Intent(this, VoiceRecognitionActivity.class);
         startActivity(intent);
     }
 
