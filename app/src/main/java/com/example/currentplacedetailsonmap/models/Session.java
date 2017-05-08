@@ -48,6 +48,13 @@ public class Session implements Serializable, Comparable {
         this.time = time;
     }
 
+    public Session(int i, double v, double v1, double v2, double v3, float distanceInMeters, int highScore, int currentScore, int higestStreak, int badCount, int okCount, int goodCount, String stringDate, HashMap<Integer, Integer> mScores, ArrayList<LatLngSerializedObject> mRoute) {
+
+    }
+
+    public Session(int id, double startLatitude, double startLongitude, double endLatitude, double endLongitude, float distanceInMeters, int highScore, int currentScore, int higestStreak, int badCount, int okCount, int goodCount, String stringDate, HashMap<Integer, Integer> mScores, ArrayList<LatLngSerializedObject> mRoute, int time) {
+    }
+
     @Override
     public int compareTo(@NonNull Object o) {
         if(o instanceof Session) {
