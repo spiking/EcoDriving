@@ -178,17 +178,18 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
         mTravelDistance = 0;
 
         for (int i = 0; i < mPoints.size(); i++) {
-
             if (i != 0) {
-                Location previous = new Location("PREVIOUS");
-                previous.setLatitude(mPoints.get(i).getLatLng().latitude);
-                previous.setLongitude(mPoints.get(i).getLatLng().longitude);
+                if (mPoints.get(i) != null && mPoints.get(i-1) != null) {
+                    Location previous = new Location("PREVIOUS");
+                    previous.setLatitude(mPoints.get(i).getLatLng().latitude);
+                    previous.setLongitude(mPoints.get(i).getLatLng().longitude);
 
-                Location current = new Location("CURRENT");
-                current.setLatitude(mPoints.get(i-1).getLatLng().latitude);
-                current.setLongitude(mPoints.get(i-1).getLatLng().longitude);
+                    Location current = new Location("CURRENT");
+                    current.setLatitude(mPoints.get(i-1).getLatLng().latitude);
+                    current.setLongitude(mPoints.get(i-1).getLatLng().longitude);
 
-                mTravelDistance += previous.distanceTo(current);
+                    mTravelDistance += previous.distanceTo(current);
+                }
             }
         }
 
