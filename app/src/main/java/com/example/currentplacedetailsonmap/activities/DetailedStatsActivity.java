@@ -72,12 +72,14 @@ public class DetailedStatsActivity extends AppCompatActivity {
         addGraphData();
 
         GraphView graph = (GraphView) findViewById(R.id.graph);
-        mSeries = new LineGraphSeries<>(mValues);
-        mSeries.setThickness(15);
-        mSeries.setColor(Color.parseColor("#4CAF50"));
-        graph.addSeries(mSeries);
-        graph.getViewport().setScalable(true);
 
+        if (mSeries != null) {
+            mSeries = new LineGraphSeries<>(mValues);
+            mSeries.setThickness(15);
+            mSeries.setColor(Color.parseColor("#4CAF50"));
+            graph.addSeries(mSeries);
+            graph.getViewport().setScalable(true);
+        }
 
         // Add route to map view
         mHandler.postDelayed(runnable, 500);

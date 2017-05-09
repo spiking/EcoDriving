@@ -112,7 +112,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
     private double mTravelDistance;
 
 
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
@@ -614,19 +613,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
     public void onConnectionSuspended(int cause) {
         Log.d(TAG, "Play services connection suspended");
     }
-
-    /**
-     * Sets up the options menu.
-     */
-
-
-/*    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        // TODO Add your menu entries here
-        super.onCreateOptionsMenu(menu, inflater);
-        getActivity().getMenuInflater().inflate(R.menu.current_place_menu, menu);
-    }*/
-
 
     // Fetches data from url passed
     private class FetchUrl extends AsyncTask<String, Void, String> {

@@ -12,7 +12,7 @@ import java.util.HashMap;
 
 public class Session implements Serializable, Comparable {
 
-    private int id;
+    private String id;
     private double startLatitude;
     private double startLongitude;
     private double endLatitude;
@@ -29,7 +29,7 @@ public class Session implements Serializable, Comparable {
     private HashMap<Integer, Integer> allScores;
     private ArrayList<LatLngSerializedObject> route;
 
-    public Session(int id, double startLatitude, double startLongitude, double endLatitude, double endLongitude, int highScore, int currentScore, int highestStreak, int badPoints, int okPoints, int goodPoints, String date, HashMap<Integer, Integer> allScores, ArrayList<LatLngSerializedObject> route, double distance, long time) {
+    public Session(String id, double startLatitude, double startLongitude, double endLatitude, double endLongitude, int highScore, int currentScore, int highestStreak, int badPoints, int okPoints, int goodPoints, String date, HashMap<Integer, Integer> allScores, ArrayList<LatLngSerializedObject> route, double distance, long time) {
         this.id = id;
         this.startLatitude = startLatitude;
         this.startLongitude = startLongitude;

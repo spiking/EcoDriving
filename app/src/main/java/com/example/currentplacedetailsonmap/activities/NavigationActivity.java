@@ -8,7 +8,6 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.location.Location;
 import android.media.MediaPlayer;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -19,6 +18,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -38,6 +38,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.UUID;
 
 import edu.cmu.pocketsphinx.Assets;
 
@@ -71,7 +72,6 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
 
     // Running
     private boolean isRunning;
-    private boolean voiceInput;
     private Long mStartTimeStamp;
 
     // Media player
@@ -114,7 +114,6 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
         resetData();
         startSession();
         isRunning = true;
-        voiceInput = false;
         voiceFeedbackIsTimedOut = false;
 
         mStartTimeStamp = System.currentTimeMillis() / 1000;
@@ -131,7 +130,7 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
             return;
         }
 
-        //Creates an object for voice recognition
+        // Creates an object for voice recognition
         createRecognizer("cancel trip", false);
 
     }
@@ -234,19 +233,10 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
         super.onResume();
         mSensorManager.registerListener(this, mLinearAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
 
-        if(!isRunning) {
+        if (!isRunning) {
             resetUI();
-        }
-
-        if(isRunning && voiceInput) {
-            voiceInput = false;
-        }
-
-        if (voiceRec != null) {
-            Log.v("VOICE", "NOT NULL");
-            // runRecognizerSetup();
-        } else {
-            Log.v("VOICE", "NULL");
+            createRecognizer("start new trip", false);
+            Log.v("VOICE", "RESUME - START NEW TRIP");
         }
 
         Log.v("VOICE", "RESUME");
@@ -257,10 +247,15 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
         super.onPause();
         mSensorManager.unregisterListener(this); // Stop receiving updates
 
-        if (isRunning && !voiceInput) {
+        if (isRunning) {
             mTimer.cancel();
             mTimer.purge();
             mTimerTask.cancel();
+
+        }
+
+        if (voiceRec != null) {
+            voiceRec.cancelVoiceDetection();
         }
 
         isRunning = false;
@@ -281,7 +276,7 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
 
             mAccelerationValue = Math.abs(event.values[0] + event.values[1] + event.values[2]);
 
-            /*Log.v("Acceleration total: ", Float.toString(mAccelerationValue));*/
+            // Log.v("Acceleration total: ", Float.toString(mAccelerationValue));
 
         }
     }
@@ -299,16 +294,6 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
 
     public void saveSession() {
 
-        // Mostly random data atm
-
-        Location startLocation = new Location("VBG");
-        startLocation.setLatitude(58.36014);
-        startLocation.setLongitude(12.344412);
-
-        Location endLocation = new Location("THN");
-        endLocation.setLatitude(58.283489);
-        endLocation.setLongitude(12.285821);
-
         Calendar calender = Calendar.getInstance();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String stringDate = sdf.format(calender.getTime());
@@ -318,7 +303,32 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
         double distance = mapFragment.getTravelDistance();
         long travelTime = (System.currentTimeMillis() / 1000) - mStartTimeStamp;
 
-        Session session = new Session(0, 58.36014, 12.344412, 58.283489, 12.285821, mScoreHandler.getHighScore(), mScoreHandler.getCurrentScore(), mScoreHandler.getHigestStreak(), mScoreHandler.getBadCount(), mScoreHandler.getOkCount(), mScoreHandler.getGoodCount(), stringDate, mScores, mRoute, distance, travelTime);
+        double startLat = 0.0;
+        double startLng = 0.0;
+
+        double endLat = 0.0;
+        double endLng = 0.0;
+
+        if (!mRoute.isEmpty()) {
+
+            if (mRoute.get(0) != null) {
+                startLat = (mRoute.get(0).getLatLng().latitude);
+                startLng = (mRoute.get(0).getLatLng().longitude);
+            }
+
+            if (mRoute.get(mRoute.size() - 1) != null) {
+                endLat = (mRoute.get(mRoute.size() - 1).getLatLng().latitude);
+                endLng = (mRoute.get(mRoute.size() - 1).getLatLng().longitude);
+            }
+
+        }
+
+
+        String uniqueID = UUID.randomUUID().toString();
+
+        Log.v("UNIQUE ID", uniqueID);
+
+        Session session = new Session(uniqueID, startLat, startLng, endLat, endLng, mScoreHandler.getHighScore(), mScoreHandler.getCurrentScore(), mScoreHandler.getHigestStreak(), mScoreHandler.getBadCount(), mScoreHandler.getOkCount(), mScoreHandler.getGoodCount(), stringDate, mScores, mRoute, distance, travelTime);
 
         try {
             // Save current session to sessions
@@ -328,9 +338,6 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        //Kills the recognizer before ending NavigationActivity
-        voiceRec.cancelVoiceDetection();
 
         Intent i = new Intent(getApplicationContext(), DetailedStatsActivity.class);
         i.putExtra("DATE", session.getDate());
@@ -355,6 +362,7 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
 
 
     public void sessionButtonClicked(View view) {
+
         Log.v("SESSION CHANGED", "Session btn clicked!");
 
         if (isRunning) {
@@ -377,9 +385,6 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
         mAccelerationFeedbackTextView.setText(getString(R.string.navigation_feedback_start));
         mCurrentScoreTextView.setText("0.0");
         mSessionButton.setText(getString(R.string.start_button));
-
-        //Creates an object for voice recognition when returning to new session screen
-        createRecognizer("start new trip", false);
     }
 
     public void startSession() {
@@ -388,7 +393,6 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
         mStartTimeStamp = System.currentTimeMillis() / 1000;
         mSessionButton.setText(getString(R.string.session_button));
     }
-
 
 
     /**** Voice Recognition ****/
@@ -422,27 +426,19 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
         }.execute();
     }
 
-    private void createRecognizer(String keyphrase, boolean backToHome){
+    private void createRecognizer(String keyphrase, boolean backToHome) {
         View[] voiceViews = new View[1];
         voiceViews[0] = findViewById(R.id.voice_result_2);
-        if(backToHome){
+        if (backToHome) {
+            Log.v("VOICE", "backToHome true");
             Intent intent = new Intent(getApplicationContext(), NavigationActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             voiceRec = new VoiceRecognition(getApplicationContext(), voiceViews, keyphrase, intent);
-        }else {
+        } else {
+            Log.v("VOICE", "backToHome false");
             voiceRec = new VoiceRecognition(getApplicationContext(), voiceViews, keyphrase, mSessionButton);
         }
         runRecognizerSetup();
     }
-
-    @Override
-    public boolean onSupportNavigateUp() {
-        Log.v("VOICE", "back button pressed");
-        voiceRec.cancelVoiceDetection();
-        createRecognizer("start new trip", true);
-        onBackPressed();
-        return true;
-    }
-
 
     @Override
     public void onRequestPermissionsResult(int requestCode,
@@ -456,5 +452,25 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
                 voiceRec.cancelVoiceDetection();
             }
         }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                onBackPressed();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        setResult(RESULT_CANCELED);
+        Log.v("VOICE", "Back button pressed");
+        voiceRec.cancelVoiceDetection();
+        createRecognizer("start new trip", true);
+        super.onBackPressed();
     }
 }

@@ -177,16 +177,16 @@ public class VoiceRecognition implements
     }
 
     public void switchSearch(String searchName) {
-        recognizer.stop();
 
-        // If we are not spotting, start listening with timeout (10000 ms or 10 seconds).
-        if (searchName.equals(KWS_SEARCH))
-            recognizer.startListening(searchName);
-        else
-            recognizer.startListening(searchName, 10000);
+        if (recognizer != null) {
+            recognizer.stop();
 
-        /*String caption = getResources().getString(captions.get(searchName));
-        ((TextView) findViewById(R.id.caption_text)).setText(caption);*/
+            // If we are not spotting, start listening with timeout (10000 ms or 10 seconds).
+            if (searchName.equals(KWS_SEARCH))
+                recognizer.startListening(searchName);
+            else
+                recognizer.startListening(searchName, 10000);
+        }
     }
 
     public void setupRecognizer(File assetsDir) throws IOException {

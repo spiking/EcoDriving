@@ -75,11 +75,11 @@ public class MapsActivityCurrentPlace extends AppCompatActivity {
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
+
         // Check if user has given permission to record audio
         int permissionCheck = ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.RECORD_AUDIO);
         if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, PERMISSIONS_REQUEST_RECORD_AUDIO);
-            return;
         }
 
         View[] voiceViews = new View[1];
@@ -184,6 +184,8 @@ public class MapsActivityCurrentPlace extends AppCompatActivity {
 
         Intent intent = new Intent(this, NavigationActivity.class);
         startActivity(intent);
+
+        voiceRec.cancelVoiceDetection();
     }
 
     @Override
@@ -234,7 +236,9 @@ public class MapsActivityCurrentPlace extends AppCompatActivity {
                 try {
                     Assets assets = new Assets(MapsActivityCurrentPlace.this);
                     File assetDir = assets.syncAssets();
-                    voiceRec.setupRecognizer(assetDir);
+                    if (voiceRec != null) {
+                        voiceRec.setupRecognizer(assetDir);
+                    }
                 } catch (IOException e) {
                     return e;
                 }
@@ -247,7 +251,9 @@ public class MapsActivityCurrentPlace extends AppCompatActivity {
                     ((TextView) findViewById(R.id.voice_result))
                             .setText("Failed to init recognizer " + result);
                 } else {
-                    voiceRec.switchSearch("wakeup"); //Speaking to wake up the recognizer
+                    if (voiceRec != null) {
+                        voiceRec.switchSearch("wakeup"); //Speaking to wake up the recognizer
+                    }
                 }
             }
         }.execute();
@@ -262,7 +268,9 @@ public class MapsActivityCurrentPlace extends AppCompatActivity {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 runRecognizerSetup();
             } else {
-                voiceRec.cancelVoiceDetection();
+                if (voiceRec != null) {
+                    voiceRec.cancelVoiceDetection();
+                }
             }
         }
     }
