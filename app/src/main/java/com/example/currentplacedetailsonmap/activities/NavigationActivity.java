@@ -162,14 +162,14 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
             mScores.put(mCounter++, mScoreHandler.getCurrentScore());
             System.out.println("COUNTER = " + mCounter + " VALUE = " + mScoreHandler.getCurrentScore());
 
-            if (mAccelerationValue > 10) {
+            if (mAccelerationValue > 5) {
                 return;
             }
 
             // Not showing this value
             /* double roundedAccelerationValue = Math.abs(Math.round(mAccelerationValue * 100.0) / 100.0); */
 
-            if (mAccelerationValue > 4) {
+            if (mAccelerationValue > 2) {
                 updateFeedbackUI(Color.WHITE, "#F44336", R.string.feedback_bad, (int) (-mAccelerationValue * 10), false);
                 mScoreHandler.incrementBadCount();
                 mScoreHandler.setCurrentStreak(0);
@@ -180,7 +180,7 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
                     voiceFeedbackIsTimedOut = true;
                 }
 
-            } else if (mAccelerationValue > 2) {
+            } else if (mAccelerationValue > 1.5) {
                 updateFeedbackUI(Color.DKGRAY, "#FFEB3B", R.string.feedback_ok, mScoreHandler.getCurrentScore(), true);
                 mScoreHandler.incrementOkCount();
                 mScoreHandler.setCurrentStreak(0);
@@ -225,7 +225,7 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
             public void run() {
                 voiceFeedbackIsTimedOut = false; // Reset timeout after 10 sec
             }
-        }, 10000);
+        }, 30000);
     }
 
     @Override
@@ -274,7 +274,7 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
             mLinearAccelerationValues[1] = event.values[1]; // y-value
             mLinearAccelerationValues[2] = event.values[2]; // x-value
 
-            mAccelerationValue = Math.abs(event.values[0] + event.values[1] + event.values[2]);
+            mAccelerationValue = Math.abs((event.values[0] + event.values[1] + event.values[2])); // Negative value for break
 
             // Log.v("Acceleration total: ", Float.toString(mAccelerationValue));
 
