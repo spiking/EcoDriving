@@ -28,8 +28,14 @@ public class Session implements Serializable, Comparable {
     private long time;
     private HashMap<Integer, Integer> allScores;
     private ArrayList<LatLngSerializedObject> route;
+    private ArrayList<LatLngSerializedObject> redScreenMarkers;
 
-    public Session(String id, double startLatitude, double startLongitude, double endLatitude, double endLongitude, int highScore, int currentScore, int highestStreak, int badPoints, int okPoints, int goodPoints, String date, HashMap<Integer, Integer> allScores, ArrayList<LatLngSerializedObject> route, double distance, long time) {
+    public Session(String id, double startLatitude, double startLongitude, double endLatitude, double endLongitude,
+                   int highScore, int currentScore, int highestStreak, int badPoints, int okPoints,
+                   int goodPoints, String date,
+                   HashMap<Integer, Integer> allScores, ArrayList<LatLngSerializedObject> route,
+                   ArrayList<LatLngSerializedObject> redScreenMarkers,
+                   double distance, long time) {
         this.id = id;
         this.startLatitude = startLatitude;
         this.startLongitude = startLongitude;
@@ -44,6 +50,7 @@ public class Session implements Serializable, Comparable {
         this.date = date;
         this.allScores = allScores;
         this.route = route;
+        this.redScreenMarkers = redScreenMarkers;
         this.distance = distance;
         this.time = time;
     }
@@ -64,6 +71,10 @@ public class Session implements Serializable, Comparable {
         return route;
     }
 
+    public ArrayList<LatLngSerializedObject> getRedScreenMarkers() {
+        return redScreenMarkers;
+    }
+
     public String getDate() {
         return date;
     }
@@ -79,4 +90,5 @@ public class Session implements Serializable, Comparable {
     public double getTravelDistance() {
         return distance;
     }
+
 }

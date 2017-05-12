@@ -27,6 +27,7 @@ public class DetailedStatsActivity extends AppCompatActivity {
     private LineGraphSeries<DataPoint> mSeries;
     private DataPoint[] mValues;
     private ArrayList<LatLngSerializedObject> mRoute;
+    private ArrayList<LatLngSerializedObject> mRedScreenMarkers;
     private MapFragment mapFragment;
 
     private int mIndex;
@@ -34,10 +35,12 @@ public class DetailedStatsActivity extends AppCompatActivity {
     private int mScore;
     private double mDistance;
     private long mTime;
+    private double mAverageSpeed;
     private TextView mScoreTextView;
     private TextView mDateTextView;
     private TextView mDistanceTextView;
     private TextView mTimeTextView;
+    private TextView mAverageSpeedTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,6 +65,7 @@ public class DetailedStatsActivity extends AppCompatActivity {
                 mTime = session.getTravelTime();
                 mScores = session.getAllScores();
                 mRoute = session.getRoute();
+                mRedScreenMarkers = session.getRedScreenMarkers();
             } else {
                 mDate = "";
                 mScore = 0;
@@ -69,8 +73,8 @@ public class DetailedStatsActivity extends AppCompatActivity {
                 mTime = 0;
                 mScores = new HashMap<Integer, Integer>();
                 mRoute = new ArrayList<LatLngSerializedObject>();
+                mRedScreenMarkers = new ArrayList<LatLngSerializedObject>();
             }
-
         }
 
         mScoreTextView = (TextView) findViewById(R.id.stats_score);
@@ -81,6 +85,16 @@ public class DetailedStatsActivity extends AppCompatActivity {
         mDistanceTextView.setText("Distance: " + String.format("%.0f", mDistance) + " m");
         mTimeTextView = (TextView) findViewById(R.id.stats_time);
         mTimeTextView.setText("Travel time: " + Long.toString(mTime) + " s");
+        mAverageSpeedTextView = (TextView) findViewById(R.id.stats_average_speed);
+
+        // Must move atleast 10 m, GPS not perfect
+        if (mTime > 0 && mDistance > 10) {
+             mAverageSpeed = (int) 3.6 * (mDistance / mTime);
+        } else {
+            mAverageSpeed = 0;
+        }
+
+        mAverageSpeedTextView.setText("Average speed: " + String.format("%.0f", mAverageSpeed) + " km/h");
 
         addGraphData();
 
@@ -92,22 +106,23 @@ public class DetailedStatsActivity extends AppCompatActivity {
             mSeries.setColor(Color.parseColor("#4CAF50"));
             graph.addSeries(mSeries);
             graph.getViewport().setScalable(true);
+            graph.getViewport().setScrollable(true);
         }
 
-        // Add route to map view
         mHandler.postDelayed(runnable, 500);
-
         FragmentManager manager = getSupportFragmentManager();
         mapFragment = (MapFragment) manager.findFragmentById(R.id.map_fragment);
-        mapFragment.addRedScreenMarkersToMap();
     }
 
     private Handler mHandler = new Handler();
+
+    // Add markers and draw route on map
 
     private Runnable runnable = new Runnable() {
         @Override
         public void run() {
             mapFragment.drawRoute(mRoute);
+            mapFragment.addRedScreenMarkersToMap(mRedScreenMarkers);
         }
     };
 

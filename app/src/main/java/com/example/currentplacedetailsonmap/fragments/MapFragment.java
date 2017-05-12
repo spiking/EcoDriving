@@ -106,7 +106,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
     // Route
     private List<LatLng> mRoutePoints = new ArrayList<LatLng>();
     private ArrayList<LatLng> mMarkerPoints;
-    private ArrayList<LatLng> mRedScreenMarkerPoints;
+    private ArrayList<LatLngSerializedObject> mRedScreenMarkerPoints;
     private ArrayList<LatLngSerializedObject> mPoints;
     private Polyline mLine;
     private Handler routeHandler = new Handler();
@@ -180,14 +180,14 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
 
         for (int i = 0; i < mPoints.size(); i++) {
             if (i != 0) {
-                if (mPoints.get(i) != null && mPoints.get(i-1) != null) {
+                if (mPoints.get(i) != null && mPoints.get(i - 1) != null) {
                     Location previous = new Location("PREVIOUS");
                     previous.setLatitude(mPoints.get(i).getLatLng().latitude);
                     previous.setLongitude(mPoints.get(i).getLatLng().longitude);
 
                     Location current = new Location("CURRENT");
-                    current.setLatitude(mPoints.get(i-1).getLatLng().latitude);
-                    current.setLongitude(mPoints.get(i-1).getLatLng().longitude);
+                    current.setLatitude(mPoints.get(i - 1).getLatLng().latitude);
+                    current.setLongitude(mPoints.get(i - 1).getLatLng().longitude);
 
                     mTravelDistance += previous.distanceTo(current);
                 }
@@ -217,7 +217,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
                 addStartAndEndMarker(route.get(i).getLatLng(), true);
             }
 
-            if (i == route.size()-1) {
+            if (i == route.size() - 1) {
                 // Destination marker
                 addStartAndEndMarker(route.get(i).getLatLng(), false);
             }
@@ -248,21 +248,31 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
 
         mMap.addMarker(options);
 
+        Log.v("RED", "Added all red markers on map! START END");
+
     }
 
-    public void addRedScreenMarkersToMap() {
+    public void addRedScreenMarkersToMap(ArrayList<LatLngSerializedObject> mRedScreenMarkers) {
 
         MarkerOptions options = new MarkerOptions();
 
-        for(int i = 0; i < mRedScreenMarkerPoints.size(); i++) {
-            options.position(mRedScreenMarkerPoints.get(i));
+        for (int i = 0; i < mRedScreenMarkers.size(); i++) {
+            options.position(mRedScreenMarkers.get(i).getLatLng());
             options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE));
             mMap.addMarker(options);
+            Log.v("RED", "Added all red markers on map!");
         }
     }
 
     public void addRedScreenMarker() {
-        mRedScreenMarkerPoints.add(new LatLng(mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude()));
+        Log.v("RED", "Added a new marker!");
+        mRedScreenMarkerPoints.add(new LatLngSerializedObject(
+                new LatLng(mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude())));
+    }
+
+    public ArrayList<LatLngSerializedObject> getRedScreenMarkerPoints() {
+        Log.v("RED", "SIZE = " + mRedScreenMarkerPoints.size());
+        return mRedScreenMarkerPoints;
     }
 
     // Save route cordinates through getLastKnownLocation() every 5 sec

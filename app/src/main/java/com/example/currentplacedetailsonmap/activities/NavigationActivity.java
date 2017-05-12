@@ -300,6 +300,7 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
 
         // Fetch route from map fragment
         ArrayList<LatLngSerializedObject> mRoute = mapFragment.getRoute();
+        ArrayList<LatLngSerializedObject> mRedScreens = mapFragment.getRedScreenMarkerPoints();
         double distance = mapFragment.getTravelDistance();
         long travelTime = (System.currentTimeMillis() / 1000) - mStartTimeStamp;
 
@@ -325,7 +326,10 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
 
         String uniqueID = UUID.randomUUID().toString();
 
-        Session session = new Session(uniqueID, startLat, startLng, endLat, endLng, mScoreHandler.getHighScore(), mScoreHandler.getCurrentScore(), mScoreHandler.getHigestStreak(), mScoreHandler.getBadCount(), mScoreHandler.getOkCount(), mScoreHandler.getGoodCount(), stringDate, mScores, mRoute, distance, travelTime);
+        Session session = new Session(uniqueID, startLat, startLng, endLat, endLng,
+                mScoreHandler.getHighScore(), mScoreHandler.getCurrentScore(), mScoreHandler.getHigestStreak(),
+                mScoreHandler.getBadCount(), mScoreHandler.getOkCount(), mScoreHandler.getGoodCount(), stringDate,
+                mScores, mRoute, mRedScreens, distance, travelTime);
 
         try {
             // Save current session to sessions
