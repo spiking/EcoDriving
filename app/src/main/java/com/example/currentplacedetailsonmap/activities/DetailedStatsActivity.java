@@ -74,7 +74,7 @@ public class DetailedStatsActivity extends AppCompatActivity {
         }
 
         mScoreTextView = (TextView) findViewById(R.id.stats_score);
-        mScoreTextView.setText("Score: " + Integer.toString(mScore));
+        mScoreTextView.setText("Total score: " + Integer.toString(mScore));
         mDateTextView = (TextView) findViewById(R.id.stats_date);
         mDateTextView.setText("Date: " + mDate);
         mDistanceTextView = (TextView) findViewById(R.id.stats_distance);
