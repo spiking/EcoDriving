@@ -11,9 +11,11 @@ import android.view.ViewGroup;
 
 import com.example.currentplacedetailsonmap.R;
 import com.example.currentplacedetailsonmap.adapters.SessionsAdapter;
+import com.example.currentplacedetailsonmap.models.Session;
 import com.example.currentplacedetailsonmap.services.DataService;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -47,9 +49,15 @@ public class SessionListFragment extends Fragment {
         RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.recycler_sessions);
         recyclerView.setHasFixedSize(true);
 
-        ArrayList sessions = DataService.getInstance().getAllSessions();
+        Map<Integer, Session> sessions = DataService.getInstance().getAllSessions();
 
-        SessionsAdapter adapter = new SessionsAdapter(sessions);
+        ArrayList<Session> sessionsList = new ArrayList<>();
+
+        for (Session s : sessions.values()) {
+            sessionsList.add(s);
+        }
+
+        SessionsAdapter adapter = new SessionsAdapter(sessionsList);
         recyclerView.setAdapter(adapter);
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());

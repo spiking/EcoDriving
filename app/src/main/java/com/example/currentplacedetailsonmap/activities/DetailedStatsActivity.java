@@ -1,6 +1,5 @@
 package com.example.currentplacedetailsonmap.activities;
 
-import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
@@ -12,6 +11,8 @@ import android.widget.TextView;
 import com.example.currentplacedetailsonmap.R;
 import com.example.currentplacedetailsonmap.fragments.MapFragment;
 import com.example.currentplacedetailsonmap.models.LatLngSerializedObject;
+import com.example.currentplacedetailsonmap.models.Session;
+import com.example.currentplacedetailsonmap.services.DataService;
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
@@ -28,6 +29,7 @@ public class DetailedStatsActivity extends AppCompatActivity {
     private ArrayList<LatLngSerializedObject> mRoute;
     private MapFragment mapFragment;
 
+    private int mIndex;
     private String mDate;
     private int mScore;
     private double mDistance;
@@ -49,14 +51,25 @@ public class DetailedStatsActivity extends AppCompatActivity {
         Bundle extras = getIntent().getExtras();
 
         if (extras != null) {
-            mDate = extras.getString("DATE");
-            mScore = extras.getInt("SCORE");
-            mDistance = extras.getDouble("DISTANCE");
-            mTime = extras.getLong("TRAVEL_TIME");
 
-            Intent intent = getIntent();
-            mScores = (HashMap<Integer, Integer>) intent.getSerializableExtra("ALL_SCORES");
-            mRoute = (ArrayList<LatLngSerializedObject>) intent.getSerializableExtra("ROUTE");
+            mIndex = extras.getInt("INDEX");
+            Session session = DataService.getInstance().getSessions().get(mIndex);
+
+            if (session != null) {
+                mDate = session.getDate();
+                mScore = session.getCurrentScore();
+                mDistance = session.getTravelDistance();
+                mTime = session.getTravelTime();
+                mScores = session.getAllScores();
+                mRoute = session.getRoute();
+            } else {
+                mDate = "";
+                mScore = 0;
+                mDistance = 0;
+                mTime = 0;
+                mScores = new HashMap<Integer, Integer>();
+                mRoute = new ArrayList<LatLngSerializedObject>();
+            }
 
         }
 
@@ -73,7 +86,7 @@ public class DetailedStatsActivity extends AppCompatActivity {
 
         GraphView graph = (GraphView) findViewById(R.id.graph);
 
-        if (mSeries != null) {
+        if (mScores != null) {
             mSeries = new LineGraphSeries<>(mValues);
             mSeries.setThickness(15);
             mSeries.setColor(Color.parseColor("#4CAF50"));

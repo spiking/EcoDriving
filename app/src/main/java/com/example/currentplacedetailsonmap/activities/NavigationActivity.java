@@ -323,10 +323,7 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
 
         }
 
-
         String uniqueID = UUID.randomUUID().toString();
-
-        Log.v("UNIQUE ID", uniqueID);
 
         Session session = new Session(uniqueID, startLat, startLng, endLat, endLng, mScoreHandler.getHighScore(), mScoreHandler.getCurrentScore(), mScoreHandler.getHigestStreak(), mScoreHandler.getBadCount(), mScoreHandler.getOkCount(), mScoreHandler.getGoodCount(), stringDate, mScores, mRoute, distance, travelTime);
 
@@ -340,12 +337,7 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
         }
 
         Intent i = new Intent(getApplicationContext(), DetailedStatsActivity.class);
-        i.putExtra("DATE", session.getDate());
-        i.putExtra("SCORE", session.getCurrentScore());
-        i.putExtra("ALL_SCORES", mScores);
-        i.putExtra("ROUTE", mRoute);
-        i.putExtra("DISTANCE", session.getTravelDistance());
-        i.putExtra("TRAVEL_TIME", session.getTravelTime());
+        i.putExtra("INDEX", DataService.getInstance().getSessionMapSize() - 1);
         startActivity(i);
 
         mTimer.cancel();

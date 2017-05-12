@@ -10,6 +10,7 @@ import com.example.currentplacedetailsonmap.R;
 import com.example.currentplacedetailsonmap.activities.DetailedStatsActivity;
 import com.example.currentplacedetailsonmap.holders.SessionsViewHolder;
 import com.example.currentplacedetailsonmap.models.Session;
+import com.example.currentplacedetailsonmap.services.DataService;
 
 import java.util.ArrayList;
 
@@ -26,7 +27,7 @@ public class SessionsAdapter extends RecyclerView.Adapter<SessionsViewHolder> {
     }
 
     @Override
-    public void onBindViewHolder(SessionsViewHolder holder, int position) {
+    public void onBindViewHolder(SessionsViewHolder holder, final int position) {
         final Session session = sessions.get(position);
         holder.updateUI(session);
 
@@ -34,12 +35,8 @@ public class SessionsAdapter extends RecyclerView.Adapter<SessionsViewHolder> {
             @Override
             public void onClick(View v) {
                 Intent i = new Intent(v.getContext().getApplicationContext(), DetailedStatsActivity.class);
-                i.putExtra("DATE", session.getDate());
-                i.putExtra("SCORE", session.getCurrentScore());
-                i.putExtra("ALL_SCORES", session.getAllScores());
-                i.putExtra("ROUTE", session.getRoute());
-                i.putExtra("DISTANCE", session.getTravelDistance());
-                i.putExtra("TRAVEL_TIME", session.getTravelTime());
+                int index = DataService.getInstance().getSessionMapSize() - 1 - position; // Reversed since ordered on date
+                i.putExtra("INDEX", index);
                 v.getContext().startActivity(i);
             }
         });
