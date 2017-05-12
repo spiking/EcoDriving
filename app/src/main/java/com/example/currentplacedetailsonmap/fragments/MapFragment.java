@@ -73,7 +73,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener {
 
-    private MapView mMapView;
+    private AntiScrollMapView mMapView;
     private static final String TAG = MapsActivityCurrentPlace.class.getSimpleName();
     private GoogleMap mMap;
     private CameraPosition mCameraPosition;
@@ -124,7 +124,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
 
         View rootView = inflater.inflate(R.layout.location_fragment, container, false);
 
-        mMapView = (MapView) rootView.findViewById(R.id.mapView);
+        mMapView = (AntiScrollMapView) rootView.findViewById(R.id.mapView);
         mMapView.onCreate(savedInstanceState);
 
         mMapView.onResume(); // Needed to get the map to display immediately

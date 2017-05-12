@@ -232,4 +232,5 @@ public class VoiceRecognition implements
     public void onTimeout() {
         switchSearch(KWS_SEARCH);
     }
+
 }
