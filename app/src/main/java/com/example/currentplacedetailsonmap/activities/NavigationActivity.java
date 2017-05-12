@@ -64,9 +64,8 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
     //Button
     private Button mSessionButton;
 
-    // Values
+    // Data
     private ScoreHandler mScoreHandler;
-
     private HashMap<Integer, Integer> mScores;
     private boolean voiceFeedbackIsTimedOut;
 
@@ -173,6 +172,7 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
                 updateFeedbackUI(Color.WHITE, "#F44336", R.string.feedback_bad, (int) (-mAccelerationValue * 10), false);
                 mScoreHandler.incrementBadCount();
                 mScoreHandler.setCurrentStreak(0);
+                mapFragment.addRedScreenMarker();
 
                 if (!voiceFeedbackIsTimedOut) {
                     mMPBad.start();

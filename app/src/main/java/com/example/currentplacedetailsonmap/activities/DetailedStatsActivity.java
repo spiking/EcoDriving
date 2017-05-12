@@ -99,7 +99,7 @@ public class DetailedStatsActivity extends AppCompatActivity {
 
         FragmentManager manager = getSupportFragmentManager();
         mapFragment = (MapFragment) manager.findFragmentById(R.id.map_fragment);
-
+        mapFragment.addRedScreenMarkersToMap();
     }
 
     private Handler mHandler = new Handler();

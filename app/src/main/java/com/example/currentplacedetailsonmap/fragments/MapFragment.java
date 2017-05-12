@@ -106,6 +106,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
     // Route
     private List<LatLng> mRoutePoints = new ArrayList<LatLng>();
     private ArrayList<LatLng> mMarkerPoints;
+    private ArrayList<LatLng> mRedScreenMarkerPoints;
     private ArrayList<LatLngSerializedObject> mPoints;
     private Polyline mLine;
     private Handler routeHandler = new Handler();
@@ -147,6 +148,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
         mGoogleApiClient.connect();
 
         mMarkerPoints = new ArrayList<>();
+        mRedScreenMarkerPoints = new ArrayList<>();
         mPoints = new ArrayList<>();
         mTravelDistance = 0;
 
@@ -165,10 +167,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
             return;
         }
 
-        Location currentLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+        mLastKnownLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
 
-        if (currentLocation != null) {
-            mPoints.add(new LatLngSerializedObject(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude())));
+        if (mLastKnownLocation != null) {
+            mPoints.add(new LatLngSerializedObject(new LatLng(mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude())));
         }
     }
 
@@ -212,12 +214,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
 
             if (i == 0) {
                 // Start marker
-                addMarker(route.get(i).getLatLng(), true);
+                addStartAndEndMarker(route.get(i).getLatLng(), true);
             }
 
             if (i == route.size()-1) {
                 // Destination marker
-                addMarker(route.get(i).getLatLng(), false);
+                addStartAndEndMarker(route.get(i).getLatLng(), false);
             }
 
             LatLng point = route.get(i).getLatLng();
@@ -230,7 +232,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
         mLine = mMap.addPolyline(options);
     }
 
-    public void addMarker(LatLng position, boolean start) {
+    public void addStartAndEndMarker(LatLng position, boolean start) {
 
         MarkerOptions options = new MarkerOptions();
 
@@ -246,6 +248,21 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
 
         mMap.addMarker(options);
 
+    }
+
+    public void addRedScreenMarkersToMap() {
+
+        MarkerOptions options = new MarkerOptions();
+
+        for(int i = 0; i < mRedScreenMarkerPoints.size(); i++) {
+            options.position(mRedScreenMarkerPoints.get(i));
+            options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE));
+            mMap.addMarker(options);
+        }
+    }
+
+    public void addRedScreenMarker() {
+        mRedScreenMarkerPoints.add(new LatLng(mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude()));
     }
 
     // Save route cordinates through getLastKnownLocation() every 5 sec
@@ -402,55 +419,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
         });
     }
 
-
-    public void addSampleRoute() {
-
-        LatLng start;
-
-        if (mLastKnownLocation != null) {
-            start = new LatLng(mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude());
-        } else {
-            start = new LatLng(55.72058441278873, 13.213205337524414);
-        }
-
-        LatLng destination = new LatLng(55.70757815494801, 13.187370300292969);
-
-        // Adding new item to the ArrayList
-        mMarkerPoints.add(start);
-        mMarkerPoints.add(destination);
-
-        // Creating MarkerOptions
-        MarkerOptions options1 = new MarkerOptions();
-        MarkerOptions options2 = new MarkerOptions();
-
-        // Setting the position of the markers
-        options1.position(destination);
-        options2.position(start);
-
-        options1.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
-        options2.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
-
-        // Add new marker to the Google Map Android API V2
-        mMap.addMarker(options1);
-        mMap.addMarker(options2);
-
-        // Checks, whether start and end locations are captured
-        if (mMarkerPoints.size() >= 2) {
-            LatLng origin = mMarkerPoints.get(0);
-            LatLng dest = mMarkerPoints.get(1);
-
-            // Getting URL to the Google Directions API
-            String url = getUrl(origin, dest);
-            Log.d("onMapClick", url.toString());
-            FetchUrl FetchUrl = new FetchUrl();
-
-            // Start downloading json data from Google Directions API
-            FetchUrl.execute(url);
-            //move map camera
-            mMap.moveCamera(CameraUpdateFactory.newLatLng(origin));
-            mMap.animateCamera(CameraUpdateFactory.zoomTo(13));
-        }
-    }
 
     /**
      * Gets the current location of the device, and positions the map's camera.
