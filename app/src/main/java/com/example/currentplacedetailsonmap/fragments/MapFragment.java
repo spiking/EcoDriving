@@ -37,7 +37,6 @@ import com.google.android.gms.location.places.PlaceLikelihoodBuffer;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
@@ -273,6 +272,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
     public ArrayList<LatLngSerializedObject> getRedScreenMarkerPoints() {
         Log.v("RED", "SIZE = " + mRedScreenMarkerPoints.size());
         return mRedScreenMarkerPoints;
+    }
+
+    public void resetRedScreenMarkers() {
+        mRedScreenMarkerPoints = new ArrayList<>();
     }
 
     // Save route cordinates through getLastKnownLocation() every 5 sec

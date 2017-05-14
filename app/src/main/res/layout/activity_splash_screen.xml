@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFFFF"
+    android:background="#FF4CAF50"
     tools:context="com.example.currentplacedetailsonmap.activities.SplashScreen">
 
 
@@ -21,6 +21,6 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/eco" />
+        app:srcCompat="@drawable/car_icon_high_res" />
 
 </android.support.constraint.ConstraintLayout>

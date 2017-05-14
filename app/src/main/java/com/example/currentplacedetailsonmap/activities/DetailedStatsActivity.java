@@ -81,26 +81,27 @@ public class DetailedStatsActivity extends AppCompatActivity {
         mScoreTextView.setText("Total score: " + Integer.toString(mScore));
         mDateTextView = (TextView) findViewById(R.id.stats_date);
         mDateTextView.setText("Date: " + mDate);
-        mDistanceTextView = (TextView) findViewById(R.id.stats_distance);
-        mDistanceTextView.setText("Distance: " + String.format("%.0f", mDistance) + " m");
         mTimeTextView = (TextView) findViewById(R.id.stats_time);
         mTimeTextView.setText("Travel time: " + Long.toString(mTime) + " s");
+
+        mDistanceTextView = (TextView) findViewById(R.id.stats_distance);
         mAverageSpeedTextView = (TextView) findViewById(R.id.stats_average_speed);
 
-        // Must move atleast 10 m, GPS not perfect
-        if (mTime > 0 && mDistance > 10) {
+        if (mTime > 10 && mDistance > 10) {
              mAverageSpeed = (int) 3.6 * (mDistance / mTime);
         } else {
             mAverageSpeed = 0;
+            mDistance = 0;
         }
 
         mAverageSpeedTextView.setText("Average speed: " + String.format("%.0f", mAverageSpeed) + " km/h");
+        mDistanceTextView.setText("Distance: " + String.format("%.0f", mDistance) + " m");
 
         addGraphData();
 
         GraphView graph = (GraphView) findViewById(R.id.graph);
 
-        if (mScores != null) {
+        if (mScores != null && mValues != null) {
             mSeries = new LineGraphSeries<>(mValues);
             mSeries.setThickness(15);
             mSeries.setColor(Color.parseColor("#4CAF50"));
