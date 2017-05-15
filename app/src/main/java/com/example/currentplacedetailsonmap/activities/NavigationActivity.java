@@ -22,6 +22,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.currentplacedetailsonmap.R;
 import com.example.currentplacedetailsonmap.controller.ScoreHandler;
@@ -54,9 +55,11 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
     private float[] mLinearAccelerationValues;
     private Sensor mRotationSensor;
     private float[] mOrientationAngles;
+    private Sensor mProximitySensor;
     private Timer mTimer;
     private TimerTask mTimerTask;
     private float mAccelerationValue;
+    private boolean mProximityBoolean;
 
     //TextView
     private TextView mCurrentScoreTextView;
@@ -74,6 +77,9 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
     // Running
     private boolean isRunning;
     private Long mStartTimeStamp;
+
+    // Mode
+    private String mDriveMode;
 
     // Media player
     private MediaPlayer mMPGood;
@@ -104,6 +110,7 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
         mAccelerationValue = 0;
         mScores = new HashMap<>();
         mScoreHandler = new ScoreHandler();
+        mProximityBoolean = false;
 
         mMPGood = MediaPlayer.create(this, R.raw.well_done);
         mMPBad = MediaPlayer.create(this, R.raw.take_it_easy);
@@ -117,6 +124,7 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
         startSession();
         isRunning = true;
         voiceFeedbackIsTimedOut = false;
+        mDriveMode = DataService.getInstance().getDriveMode();
 
         mStartTimeStamp = System.currentTimeMillis() / 1000;
         Log.v("ROUTE", Long.toString(mStartTimeStamp));
@@ -171,34 +179,77 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
             // Not showing this value
             /* double roundedAccelerationValue = Math.abs(Math.round(mAccelerationValue * 100.0) / 100.0); */
 
-            if (mAccelerationValue > 1.5) {
-                updateFeedbackUI(Color.WHITE, "#F44336", R.string.feedback_bad, (int) (-mAccelerationValue * 10), false);
-                mScoreHandler.incrementBadCount();
-                mScoreHandler.setCurrentStreak(0);
-                mapFragment.addRedScreenMarker();
+            if (mDriveMode.equals("CAR")) {
 
-                if (!voiceFeedbackIsTimedOut) {
-                    mMPBad.start();
-                    voiceFeedbackTimeout();
-                    voiceFeedbackIsTimedOut = true;
-                }
+                Log.v("MODE", "CAR");
 
-            } else if (mAccelerationValue > 1.0) {
-                updateFeedbackUI(Color.DKGRAY, "#FFEB3B", R.string.feedback_ok, mScoreHandler.getCurrentScore(), true);
-                mScoreHandler.incrementOkCount();
-                mScoreHandler.setCurrentStreak(0);
-            } else {
-                updateFeedbackUI(Color.DKGRAY, "#4CAF50", R.string.feedback_good, 10, false);
-                mScoreHandler.incrementGoodCount();
-                mScoreHandler.incrementCurrentStreak();
-
-                if (mScoreHandler.getCurrentStreak() >= 20 && !voiceFeedbackIsTimedOut) {
-                    mMPGood.start();
+                if (mAccelerationValue > 1.5) {
+                    updateFeedbackUI(Color.WHITE, "#F44336", R.string.feedback_bad, (int) (-mAccelerationValue * 10), false);
+                    mScoreHandler.incrementBadCount();
                     mScoreHandler.setCurrentStreak(0);
-                    voiceFeedbackTimeout();
-                    voiceFeedbackIsTimedOut = true;
+                    mapFragment.addRedScreenMarker();
+
+                    if (!voiceFeedbackIsTimedOut) {
+                        mMPBad.start();
+                        voiceFeedbackTimeout();
+                        voiceFeedbackIsTimedOut = true;
+                    }
+
+                } else if (mAccelerationValue > 1.0) {
+                    updateFeedbackUI(Color.DKGRAY, "#FFEB3B", R.string.feedback_ok, mScoreHandler.getCurrentScore(), true);
+                    mScoreHandler.incrementOkCount();
+                    mScoreHandler.setCurrentStreak(0);
+                } else {
+                    updateFeedbackUI(Color.DKGRAY, "#4CAF50", R.string.feedback_good, 10, false);
+                    mScoreHandler.incrementGoodCount();
+                    mScoreHandler.incrementCurrentStreak();
+
+                    if (mScoreHandler.getCurrentStreak() >= 20 && !voiceFeedbackIsTimedOut) {
+                        mMPGood.start();
+                        mScoreHandler.setCurrentStreak(0);
+                        voiceFeedbackTimeout();
+                        voiceFeedbackIsTimedOut = true;
+                    }
                 }
+
             }
+
+            if (mDriveMode.equals("BIKE")) {
+
+                Log.v("MODE", "BIKE");
+
+                if (mAccelerationValue > 2.5) {
+                    updateFeedbackUI(Color.WHITE, "#F44336", R.string.feedback_bad, (int) (-mAccelerationValue * 10), false);
+                    mScoreHandler.incrementBadCount();
+                    mScoreHandler.setCurrentStreak(0);
+                    mapFragment.addRedScreenMarker();
+
+                    if (!voiceFeedbackIsTimedOut) {
+                        mMPBad.start();
+                        voiceFeedbackTimeout();
+                        voiceFeedbackIsTimedOut = true;
+                    }
+
+                } else if (mAccelerationValue > 1.5) {
+                    updateFeedbackUI(Color.DKGRAY, "#FFEB3B", R.string.feedback_ok, mScoreHandler.getCurrentScore(), true);
+                    mScoreHandler.incrementOkCount();
+                    mScoreHandler.setCurrentStreak(0);
+                } else {
+                    updateFeedbackUI(Color.DKGRAY, "#4CAF50", R.string.feedback_good, 10, false);
+                    mScoreHandler.incrementGoodCount();
+                    mScoreHandler.incrementCurrentStreak();
+
+                    if (mScoreHandler.getCurrentStreak() >= 20 && !voiceFeedbackIsTimedOut) {
+                        mMPGood.start();
+                        mScoreHandler.setCurrentStreak(0);
+                        voiceFeedbackTimeout();
+                        voiceFeedbackIsTimedOut = true;
+                    }
+                }
+
+            }
+
+
         }
     };
 
@@ -236,13 +287,16 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
         super.onResume();
         mSensorManager.registerListener(this, mLinearAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
         mSensorManager.registerListener(this, mRotationSensor, SensorManager.SENSOR_DELAY_NORMAL);
-
+        // mSensorManager.registerListener(this, mProximitySensor, SensorManager.SENSOR_DELAY_NORMAL);
 
         if (!isRunning) {
             resetUI();
             createRecognizer("start new trip", false);
             Log.v("VOICE", "RESUME - START NEW TRIP");
+            mProximityBoolean = true;
         }
+
+        mDriveMode = DataService.getInstance().getDriveMode();
 
         Log.v("VOICE", "RESUME");
     }
@@ -326,6 +380,21 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
                 update(event.values);
             }
         }
+
+        if (event.sensor == mProximitySensor) {
+            if (event.values[0] == 0) {
+                if (mProximityBoolean) {
+                    Log.v("PROXIMITY", "CLOSE");
+                    mSessionButton.performClick();
+                    mProximityBoolean = false;
+                } else {
+                    mProximityBoolean = true;
+                }
+
+            } else {
+                Log.v("PROXIMITY", "FAR");
+            }
+        }
     }
 
     private void update(float[] vectors) {
@@ -346,10 +415,14 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
 
     public void initializeSensors() {
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+
         mLinearAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
         mRotationSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
+        // mProximitySensor = mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
+
         mSensorManager.registerListener(this, mLinearAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
         mSensorManager.registerListener(this, mRotationSensor, SensorManager.SENSOR_DELAY_NORMAL);
+       //  mSensorManager.registerListener(this, mProximitySensor, SensorManager.SENSOR_DELAY_NORMAL);
     }
 
     public void saveSession() {
@@ -482,8 +555,7 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
             @Override
             protected void onPostExecute(Exception result) {
                 if (result != null) {
-                    ((TextView) findViewById(R.id.voice_result))
-                            .setText("Failed to init recognizer " + result);
+                    Toast.makeText(getApplicationContext(), "Could not init voice recognition", Toast.LENGTH_SHORT);
                 } else {
                     voiceRec.switchSearch("wakeup"); //Speaking to wake up the recognizer
                 }

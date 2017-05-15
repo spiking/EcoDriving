@@ -31,6 +31,7 @@ public class DataService {
     private static Map<Integer, Session> sessions = new TreeMap<>();
 
     public static String mMapColor = "LIGHT";
+    public static String mDriveMode = "CAR";
 
     public static void writeSessionsToDatabase(String fileName) throws IOException {
         FileOutputStream fos = ApplicationContext.getAppContext().openFileOutput(fileName, Context.MODE_PRIVATE);
@@ -66,6 +67,22 @@ public class DataService {
         fos.close();
     }
 
+    public static void readDriveModeFromDatabase(String fileName) throws IOException, ClassNotFoundException {
+        FileInputStream fis = ApplicationContext.getAppContext().openFileInput(fileName);
+        ObjectInputStream is = new ObjectInputStream(fis);
+        mDriveMode = (String) is.readObject();
+        is.close();
+        fis.close();
+    }
+
+    public static void saveDriveModeToDatabase(String fileName) throws IOException {
+        FileOutputStream fos = ApplicationContext.getAppContext().openFileOutput(fileName, Context.MODE_PRIVATE);
+        ObjectOutputStream os = new ObjectOutputStream(fos);
+        os.writeObject(mDriveMode);
+        os.close();
+        fos.close();
+    }
+
     public static void writeSessionToSessions(Session session) {
         sessions.put(sessions.size(), session);
     }
@@ -76,6 +93,15 @@ public class DataService {
         sessions = sortedSessions;
         printMap(sessions);
         return sessions;
+    }
+
+    public String getDriveMode() {
+        return mDriveMode;
+    }
+
+    public void setDriveMode(String mDriveMode) throws IOException {
+        this.mDriveMode = mDriveMode;
+        saveDriveModeToDatabase("DRIVE_MODE");
     }
 
     public String getMapColor() {

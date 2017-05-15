@@ -5,6 +5,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
@@ -16,7 +20,8 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.TextView;
+import android.widget.Button;
+import android.widget.Toast;
 
 import com.example.currentplacedetailsonmap.R;
 import com.example.currentplacedetailsonmap.services.DataService;
@@ -40,16 +45,22 @@ import edu.cmu.pocketsphinx.Assets;
  * An activity that displays a map showing the place at the device's current location.
  */
 
-public class MapsActivityCurrentPlace extends AppCompatActivity {
+public class MapsActivityCurrentPlace extends AppCompatActivity implements SensorEventListener {
 
     // Side menu and toolbar customization.
     private Toolbar mToolbar;
     private Drawer mDrawer;
 
+    // Button
+    private Button mStartButton;
+
     /* Used to handle permission request */
     private static final int PERMISSIONS_REQUEST_RECORD_AUDIO = 1;
-
     private VoiceRecognition voiceRec;
+
+    // Sensors
+    private SensorManager mSensorManager;
+    private Sensor mSensor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,14 +73,21 @@ public class MapsActivityCurrentPlace extends AppCompatActivity {
         // Setting toolbar as the ActionBar with setSupportActionBar() call
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(mToolbar);
+
+        mStartButton = (Button) findViewById(R.id.start_button);
+
         // Setup side menu
         setupNavigationMenu();
+
+        // mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+        // mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
 
         // Load cached data into temporary storage
 
         try {
             DataService.getInstance().readSessionsFromDatabase("DATABASE");
             DataService.getInstance().readMapColorTypeFromDatabase("MAP_COLOR");
+            DataService.getInstance().readDriveModeFromDatabase("DRIVE_MODE");
         } catch (IOException e) {
             e.printStackTrace();
         } catch (ClassNotFoundException e) {
@@ -183,6 +201,7 @@ public class MapsActivityCurrentPlace extends AppCompatActivity {
         Log.v("SESSION", "Start button was clicked");
 
         Intent intent = new Intent(this, NavigationActivity.class);
+        intent.putExtra("INITIAL", "YES");
         startActivity(intent);
 
         voiceRec.cancelVoiceDetection();
@@ -191,16 +210,33 @@ public class MapsActivityCurrentPlace extends AppCompatActivity {
     @Override
     public void onResume() {
         super.onResume();
+        // mSensorManager.registerListener(this, mSensor, SensorManager.SENSOR_DELAY_NORMAL);
     }
 
     @Override
     public void onPause() {
         super.onPause();
+        // mSensorManager.unregisterListener(this);
     }
 
     @Override
     public void onStop() {
         super.onStop();
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
+    }
+
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+        if (event.values[0] == 0) {
+            Log.v("PROXIMITY", "CLOSE");
+            mStartButton.performClick();
+        } else {
+            Log.v("PROXIMITY", "FAR");
+        }
     }
 
     @Override
@@ -210,7 +246,7 @@ public class MapsActivityCurrentPlace extends AppCompatActivity {
                 mDrawer.openDrawer();
                 return true;
             case R.id.option_get_place:
-                /*showCurrentPlace();*/
+                /* showCurrentPlace(); */
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -248,8 +284,7 @@ public class MapsActivityCurrentPlace extends AppCompatActivity {
             @Override
             protected void onPostExecute(Exception result) {
                 if (result != null) {
-                    ((TextView) findViewById(R.id.voice_result))
-                            .setText("Failed to init recognizer " + result);
+                    Toast.makeText(getApplicationContext(), "Could not init voice recognition", Toast.LENGTH_SHORT);
                 } else {
                     if (voiceRec != null) {
                         voiceRec.switchSearch("wakeup"); //Speaking to wake up the recognizer

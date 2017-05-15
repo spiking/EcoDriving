@@ -15,8 +15,9 @@ import java.io.IOException;
 public class SettingsActivity extends AppCompatActivity {
 
     private Toolbar mToolbar;
-    private Switch mSwitch;
+    private Switch mMapSwitch;
     private TextView mSwitchText;
+    private Switch mDriveModeSwitch;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,22 +28,24 @@ public class SettingsActivity extends AppCompatActivity {
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        mSwitch = (Switch) findViewById(R.id.map_color_switch);
+        mMapSwitch = (Switch) findViewById(R.id.map_color_switch);
         mSwitchText = (TextView) findViewById(R.id.map_color_text);
 
+        mDriveModeSwitch = (Switch) findViewById(R.id.drive_mode_switch);
+
         if (!DataService.getInstance().getMapColor().equals("DARK")) {
-            mSwitch.setChecked(false);
+            mMapSwitch.setChecked(false);
         } else {
-            mSwitch.setChecked(true);
+            mMapSwitch.setChecked(true);
         }
 
-        mSwitch.setOnClickListener(new View.OnClickListener() {
+        mMapSwitch.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
                 // TODO Auto-generated method stub
 
-                if(mSwitch.isChecked()) {
+                if(mMapSwitch.isChecked()) {
                     System.out.println("CHECKED");
                     try {
                         DataService.getInstance().setMapColorDark("DARK");
@@ -53,6 +56,36 @@ public class SettingsActivity extends AppCompatActivity {
                     System.out.println("NOT CHECKED");
                     try {
                         DataService.getInstance().setMapColorDark("LIGHT");
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+
+        if (!DataService.getInstance().getDriveMode().equals("CAR")) {
+            mDriveModeSwitch.setChecked(false);
+        } else {
+            mDriveModeSwitch.setChecked(true);
+        }
+
+        mDriveModeSwitch.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                // TODO Auto-generated method stub
+
+                if(mDriveModeSwitch.isChecked()) {
+                    System.out.println("CHECKED");
+                    try {
+                        DataService.getInstance().setDriveMode("CAR");
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    System.out.println("NOT CHECKED");
+                    try {
+                        DataService.getInstance().setDriveMode("BIKE");
                     } catch (IOException e) {
                         e.printStackTrace();
                     }

@@ -6,6 +6,17 @@
     android:layout_height="match_parent"
     tools:context="com.example.currentplacedetailsonmap.activities.SettingsActivity">
 
+    <TextView
+        android:id="@+id/drive_mode_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="24dp"
+        android:layout_marginTop="32dp"
+        android:text="Car Mode"
+        android:textSize="24sp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/map_color_text" />
+
     <android.support.v7.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="0dp"
@@ -51,7 +62,17 @@
         android:scaleY="1.5"
         app:layout_constraintBaseline_toBaselineOf="@+id/map_color_text"
         app:layout_constraintLeft_toRightOf="@+id/map_color_text"
-        android:layout_marginLeft="16dp" />
+        android:layout_marginLeft="60dp" />
+
+    <Switch
+        android:id="@+id/drive_mode_switch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="58dp"
+        android:scaleX="1.5"
+        android:scaleY="1.5"
+        app:layout_constraintBaseline_toBaselineOf="@+id/drive_mode_text"
+        app:layout_constraintLeft_toRightOf="@+id/drive_mode_text" />
 
     <TextView
         android:id="@+id/map_color_text"

@@ -242,7 +242,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
         } else {
             mMarkerPoints.add(position);
             options.position(position);
-            options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
+            options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
         }
 
         mMap.addMarker(options);
@@ -257,7 +257,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
 
         for (int i = 0; i < mRedScreenMarkers.size(); i++) {
             options.position(mRedScreenMarkers.get(i).getLatLng());
-            options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE));
+            options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
             mMap.addMarker(options);
             Log.v("RED", "Added all red markers on map!");
         }
