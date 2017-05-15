@@ -46,14 +46,12 @@ public class SettingsActivity extends AppCompatActivity {
                 // TODO Auto-generated method stub
 
                 if(mMapSwitch.isChecked()) {
-                    System.out.println("CHECKED");
                     try {
                         DataService.getInstance().setMapColorDark("DARK");
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
                 } else {
-                    System.out.println("NOT CHECKED");
                     try {
                         DataService.getInstance().setMapColorDark("LIGHT");
                     } catch (IOException e) {
@@ -76,14 +74,12 @@ public class SettingsActivity extends AppCompatActivity {
                 // TODO Auto-generated method stub
 
                 if(mDriveModeSwitch.isChecked()) {
-                    System.out.println("CHECKED");
                     try {
                         DataService.getInstance().setDriveMode("CAR");
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
                 } else {
-                    System.out.println("NOT CHECKED");
                     try {
                         DataService.getInstance().setDriveMode("BIKE");
                     } catch (IOException e) {
