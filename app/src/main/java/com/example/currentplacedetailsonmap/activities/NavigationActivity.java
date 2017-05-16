@@ -20,7 +20,13 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
 import android.widget.Button;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -42,6 +48,8 @@ import java.util.TimerTask;
 import java.util.UUID;
 
 import edu.cmu.pocketsphinx.Assets;
+
+import static android.R.attr.textColor;
 
 
 public class NavigationActivity extends AppCompatActivity implements SensorEventListener {
@@ -66,6 +74,7 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
     //TextView
     private TextView mCurrentScoreTextView;
     private TextView mAccelerationFeedbackTextView;
+    private TextView animationText;
     private static int mCounter = 0;
 
     //Button
@@ -124,6 +133,7 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
 
         mCurrentScoreTextView = (TextView) findViewById(R.id.navigation_acceleration_value);
         mAccelerationFeedbackTextView = (TextView) findViewById(R.id.navigation_feedback);
+        animationText = (TextView) findViewById(R.id.pointAnimation);
 
         resetData();
         startSession();
@@ -255,14 +265,59 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
         if (!isRunning) {
             return;
         }
-
         mCurrentScoreTextView.setTextColor(textColor);
         mAccelerationFeedbackTextView.setTextColor(textColor);
         findViewById(R.id.navigation_layout).setBackgroundColor(Color.parseColor(backgroundColor));
+        /*animateScore(scoreChange, 20, Color.WHITE, false);*/
         mAccelerationFeedbackTextView.setText(getString(feedbackString));
         mCurrentScoreTextView.setText(Double.toString(mScoreHandler.getCurrentScore()));
 
     }
+
+    /*private void animateScore(int score, float textSize, int textColor, boolean idle){
+        if(!idle) {
+            int totalScore = mScoreHandler.getCurrentScore();
+
+            FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) animationText.getLayoutParams();
+
+            //Flytta animationen beroende på antal poäng
+            if(totalScore < 100){
+                Log.v("ANIMATION", "margin 10");
+                params.leftMargin = 150;
+            }
+            else if(totalScore >= 100 && totalScore < 1000){
+                Log.v("ANIMATION", "margin 100");
+                params.leftMargin = 200;
+            }
+            else if(totalScore >= 1000 && totalScore < 10000){
+                Log.v("ANIMATION", "margin 1000");
+                params.leftMargin = 150;
+
+            }
+            else{
+                Log.v("ANIMATION", "margin 10000");
+                params.leftMargin = 150;
+            }
+
+            animationText.setLayoutParams(params);
+            animationText.setTextSize(textSize);
+            animationText.setTextColor(textColor);
+            animationText.setText("+" + score);
+
+            Animation in = new AlphaAnimation(0.0f, 1.0f);
+            in.setDuration(300);
+
+            Animation out = new AlphaAnimation(1.0f, 0.0f);
+            out.setDuration(300);
+
+            animationText.startAnimation(in);
+            animationText.startAnimation(out);
+        }else{
+            animationText.setText("");
+        }
+
+
+    }*/
 
     public void voiceFeedbackTimeout() {
         Handler handler = new Handler();
@@ -282,8 +337,8 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
 
         if (!isRunning) {
             resetUI();
-            createRecognizer("start new trip", false);
-            Log.v("VOICE", "RESUME - START NEW TRIP");
+            createRecognizer("start trip", false);
+            Log.v("VOICE", "RESUME - START TRIP");
             mProximityBoolean = true;
         }
 
@@ -614,7 +669,7 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
         setResult(RESULT_CANCELED);
         Log.v("VOICE", "Back button pressed");
         voiceRec.cancelVoiceDetection();
-        createRecognizer("start new trip", true);
+        createRecognizer("start trip", true);
         super.onBackPressed();
     }
 }

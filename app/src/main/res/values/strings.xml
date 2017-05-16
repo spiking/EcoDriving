@@ -41,10 +41,10 @@
     <string name="slide_2_desc">EcoDriving helps you become a more eco-friendly driver! We study your driving habits by continuously update, calculate and monitor your actions to optimize your driving for environmental purposes. </string>
 
     <string name="slide_3_title">Live feedback</string>
-    <string name="slide_3_desc">You can initiate or terminate a driving run by either touching or speak the phrases \"Start new trip\" and \"Cancel trip\". While you are driving your main goal is to keep the green status as much as you can while receiving feedback from the app.</string>
+    <string name="slide_3_desc">You can initiate or terminate a driving run by either touching or speak the phrases \"Start trip\" and \"Cancel trip\". While you are driving your main goal is to keep the green status and earn as mutch points as you can while receiving feedback from the app.</string>
 
     <string name="slide_4_title">Statistics</string>
-    <string name="slide_4_desc">EcoDriving always keep track of your progress so that you can improve your driving habits. Compare your statistics from previous routes and receive concrete facts on how you are performing and what you can improve on!</string>
+    <string name="slide_4_desc">EcoDriving always keep track of your progress so that you can improve your driving habits. Compare your statistics from previous routes and receive concrete facts on how you are performing and learn what you can improve on!</string>
 
     <string name="slide_5_title">Happy EcoDriving!</string>
     <string name="slide_5_desc">Now you are all set and ready to drive for a better future! But remember, avoiding the use of a vehicle is always the better environmental option.</string>
