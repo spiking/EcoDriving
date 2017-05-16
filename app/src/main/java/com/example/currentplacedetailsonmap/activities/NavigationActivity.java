@@ -59,6 +59,8 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
     private Timer mTimer;
     private TimerTask mTimerTask;
     private float mAccelerationValue;
+    private float[] mAccelerationArray;
+    private int mAccelerationCounter;
     private boolean mProximityBoolean;
 
     //TextView
@@ -108,9 +110,12 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
         mLinearAccelerationValues = new float[3];
         mOrientationAngles = new float[3];
         mAccelerationValue = 0;
+        mAccelerationArray = new float[5];
+        mAccelerationCounter = 0;
         mScores = new HashMap<>();
         mScoreHandler = new ScoreHandler();
         mProximityBoolean = false;
+
 
         mMPGood = MediaPlayer.create(this, R.raw.well_done);
         mMPBad = MediaPlayer.create(this, R.raw.take_it_easy);
@@ -167,23 +172,11 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
         @Override
         public void run() {
 
-            // Log.v("Counter", "RUNNING! " + mCounter++);
-
             mScores.put(mCounter++, mScoreHandler.getCurrentScore());
-            System.out.println("COUNTER = " + mCounter + " VALUE = " + mScoreHandler.getCurrentScore());
-
-            if (mAccelerationValue > 5) {
-                mAccelerationValue = 3;
-            }
-
-            // Not showing this value
-            /* double roundedAccelerationValue = Math.abs(Math.round(mAccelerationValue * 100.0) / 100.0); */
 
             if (mDriveMode.equals("CAR")) {
 
-                Log.v("MODE", "CAR");
-
-                if (mAccelerationValue > 1.5) {
+                if (mAccelerationValue > 1.25) {
                     updateFeedbackUI(Color.WHITE, "#F44336", R.string.feedback_bad, (int) (-mAccelerationValue * 10), false);
                     mScoreHandler.incrementBadCount();
                     mScoreHandler.setCurrentStreak(0);
@@ -216,9 +209,7 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
 
             if (mDriveMode.equals("BIKE")) {
 
-                Log.v("MODE", "BIKE");
-
-                if (mAccelerationValue > 2.5) {
+                if (mAccelerationValue > 1.75) {
                     updateFeedbackUI(Color.WHITE, "#F44336", R.string.feedback_bad, (int) (-mAccelerationValue * 10), false);
                     mScoreHandler.incrementBadCount();
                     mScoreHandler.setCurrentStreak(0);
@@ -328,6 +319,13 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
         // Acceleration = gravity + linear acceleration <=> linear acceleration = acceleration - gravity
 
         if (event.sensor == mLinearAccelerometer) {
+
+            if (mAccelerationCounter < 4) {
+                mAccelerationCounter++;
+            } else {
+                mAccelerationCounter = 0;
+            }
+
             mLinearAccelerationValues[0] = event.values[0]; // x-value
             mLinearAccelerationValues[1] = event.values[1]; // y-value
             mLinearAccelerationValues[2] = event.values[2]; // z-value
@@ -344,11 +342,10 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
                 // Vertical focus
                 // Filter vertical jump in vertical mode
 
-                if (mY > 2 && mZ < 4) {
-                    Log.v("JUMP", "VALUE = " + mY);
-                    mAccelerationValue = 1;
+                if (mY > 3) {
+                    mAccelerationArray[mAccelerationCounter] = 0;
                 } else {
-                    mAccelerationValue = mZ;
+                    mAccelerationArray[mAccelerationCounter] = mZ;
                 }
 
             } else {
@@ -356,15 +353,17 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
                 // Horizontal focus
                 // Filter vertical jump in horizontal mode
 
-                if (mZ > 2 && mY < 4) {
-                    Log.v("JUMP", "VALUE = " + mZ);
-                    mAccelerationValue = 1;
+                if (mZ > 3) {
+                    mAccelerationArray[mAccelerationCounter] = 0;
                 } else {
-                    mAccelerationValue = mY;
+                    mAccelerationArray[mAccelerationCounter] = mY;
                 }
             }
 
-/*            Log.v("ANGLE", " = " + deviceAngle);
+            mAccelerationValue = getAverageAcceleration();
+
+/*            Log.v("VALUE", " = " + mAccelerationCounter);
+            Log.v("VALUE", " = " + mAccelerationValue);
             Log.v("VALUE X", "X = " + event.values[0]);
             Log.v("VALUE Y", "Y = " + event.values[1]);
             Log.v("VALUE Z", "Z = " + event.values[2]);*/
@@ -408,6 +407,14 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
         SensorManager.getOrientation(adjustedRotationMatrix, mOrientationAngles);
     }
 
+    private float getAverageAcceleration() {
+        float sum = 0;
+        for (int i = 0; i < mAccelerationArray.length; i++) {
+            sum += mAccelerationArray[i];
+        }
+        return sum / mAccelerationArray.length;
+    }
+
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
         // Chill
@@ -422,7 +429,7 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
 
         mSensorManager.registerListener(this, mLinearAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
         mSensorManager.registerListener(this, mRotationSensor, SensorManager.SENSOR_DELAY_NORMAL);
-       //  mSensorManager.registerListener(this, mProximitySensor, SensorManager.SENSOR_DELAY_NORMAL);
+        //  mSensorManager.registerListener(this, mProximitySensor, SensorManager.SENSOR_DELAY_NORMAL);
     }
 
     public void saveSession() {

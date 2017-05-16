@@ -122,8 +122,8 @@ public class DetailedStatsActivity extends AppCompatActivity {
     private Runnable runnable = new Runnable() {
         @Override
         public void run() {
-            mapFragment.drawRoute(mRoute);
             mapFragment.addRedScreenMarkersToMap(mRedScreenMarkers);
+            mapFragment.drawRoute(mRoute);
         }
     };
 
@@ -136,7 +136,7 @@ public class DetailedStatsActivity extends AppCompatActivity {
         mScores.put(0, 0);
         mValues = new DataPoint[mScores.size() - 1];
 
-        for (int i = 0; i < mScores.size() - 1; i++) {
+        for (int i = 0; i < mScores.size()-1; i++) {
             DataPoint dp = new DataPoint(i, mScores.get(i));
             mValues[i] = dp;
         }

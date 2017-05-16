@@ -201,8 +201,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
 
     public void drawRoute(ArrayList<LatLngSerializedObject> route) {
 
-        mMap.clear();
-
         PolylineOptions options = new PolylineOptions().width(15).color(Color.parseColor("#2196F3")).geodesic(true);
 
         mTravelDistance = 0;
