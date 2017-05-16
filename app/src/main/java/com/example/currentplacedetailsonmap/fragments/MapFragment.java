@@ -11,7 +11,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
@@ -84,7 +83,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
     // not granted.
     private final LatLng mDefaultLocation = new LatLng(-33.8523341, 151.2106085);
     private static final int DEFAULT_ZOOM = 15;
-    private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     private boolean mLocationPermissionGranted;
 
     // The geographical location where the device is currently located. That is, the last-known
@@ -103,7 +101,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
     private LatLng[] mLikelyPlaceLatLngs = new LatLng[mMaxEntries];
 
     // Route
-    private List<LatLng> mRoutePoints = new ArrayList<LatLng>();
+    private List<LatLng> mRoutePoints = new ArrayList<>();
     private ArrayList<LatLng> mMarkerPoints;
     private ArrayList<LatLngSerializedObject> mRedScreenMarkerPoints;
     private ArrayList<LatLngSerializedObject> mPoints;
@@ -299,14 +297,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
     @Override
     public void onResume() {
         super.onResume();
-        System.out.println("ON RESUME - MAP FRAGMENT");
         mMapView.onResume();
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        System.out.println("ON PAUSE - MAP FRAGMENT");
         mMapView.onPause();
         routeHandler.removeCallbacks(runnable);
     }
@@ -321,6 +317,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
     public void onLowMemory() {
         super.onLowMemory();
         mMapView.onLowMemory();
+    }
+
+    public void setPermissionGranted() {
+        mLocationPermissionGranted = true;
     }
 
     public void styleMap() {
@@ -350,17 +350,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
 
         mMap = map;
         // map is a GoogleMap object
-
-        if (ContextCompat.checkSelfPermission(getActivity().getApplicationContext(),
-                android.Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED) {
-            mLocationPermissionGranted = true;
-            mMap.setMyLocationEnabled(true);
-        } else {
-            ActivityCompat.requestPermissions(getActivity(),
-                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
-                    PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
-        }
 
         // Turn on the My Location layer and the related control on the map.
         updateLocationUI();
@@ -436,7 +425,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
     /**
      * Gets the current location of the device, and positions the map's camera.
      */
-    private void getDeviceLocation() {
+
+    public void getDeviceLocation() {
 
         /*
          * Request location permission, so that we can get the location of the
@@ -447,11 +437,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
                 android.Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
             mLocationPermissionGranted = true;
-        } else {
-            ActivityCompat.requestPermissions(getActivity(),
-                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
-                    PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
         }
+
         /*
          * Get the best and most recent location of the device, which may be null in rare
          * cases when a location is not available.
@@ -459,7 +446,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
         if (mLocationPermissionGranted) {
             mLastKnownLocation = LocationServices.FusedLocationApi
                     .getLastLocation(mGoogleApiClient);
-            System.out.println("Last known position updated, add to route!");
 
             if (mLastKnownLocation != null) {
                 LatLng location = new LatLng(mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude());
@@ -481,36 +467,13 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
         }
     }
 
-    /**
-     * Handles the result of the request for location permissions.
-     */
-    @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           @NonNull String permissions[],
-                                           @NonNull int[] grantResults) {
-        mLocationPermissionGranted = false;
-        switch (requestCode) {
-            case PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION: {
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    mLocationPermissionGranted = true;
-                }
-            }
-
-        }
-        updateLocationUI();
-    }
 
     /**
      * Updates the map's UI settings based on whether the user has granted location permission.
      */
-    private void updateLocationUI() {
-
-        System.out.println("UPDATE LOCATION UI");
+    public void updateLocationUI() {
 
         if (mMap == null) {
-            System.out.println("mMAP IS NULL");
             return;
         }
 
@@ -523,13 +486,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
         if (ContextCompat.checkSelfPermission(getActivity().getApplicationContext(),
                 android.Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
-            System.out.println("Permission granted!");
             mLocationPermissionGranted = true;
-        } else {
-            ActivityCompat.requestPermissions(getActivity(),
-                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
-                    PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
-            System.out.println("Permission NOT granted!");
         }
 
         if (mLocationPermissionGranted) {
@@ -538,7 +495,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
         } else {
             mMap.setMyLocationEnabled(false);
             mMap.getUiSettings().setMyLocationButtonEnabled(false);
-            mLastKnownLocation = null;
+            mLastKnownLocation = new Location("INITIAL");
+            mLastKnownLocation.setLatitude(55.70466010000001);
+            mLastKnownLocation.setLongitude(13.191007300000024);
+
         }
     }
 
@@ -551,7 +511,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
             if (mLastKnownLocation != null) {
                 outState.putParcelable(KEY_CAMERA_POSITION, mMap.getCameraPosition());
                 outState.putParcelable(KEY_LOCATION, mLastKnownLocation);
-                Log.v("LOCATION", mLastKnownLocation.toString());
                 super.onSaveInstanceState(outState);
             }
         }

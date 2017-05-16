@@ -12,9 +12,10 @@ import android.hardware.SensorManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -24,6 +25,7 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.example.currentplacedetailsonmap.R;
+import com.example.currentplacedetailsonmap.fragments.MapFragment;
 import com.example.currentplacedetailsonmap.services.DataService;
 import com.mikepenz.materialdrawer.AccountHeader;
 import com.mikepenz.materialdrawer.AccountHeaderBuilder;
@@ -55,12 +57,15 @@ public class MapsActivityCurrentPlace extends AppCompatActivity implements Senso
     private Button mStartButton;
 
     /* Used to handle permission request */
-    private static final int PERMISSIONS_REQUEST_RECORD_AUDIO = 1;
+    private static final int PERMISSIONS_REQUEST_ALL = 1;
     private VoiceRecognition voiceRec;
 
     // Sensors
     private SensorManager mSensorManager;
     private Sensor mSensor;
+
+    // Map
+    private MapFragment mMapFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,11 +99,14 @@ public class MapsActivityCurrentPlace extends AppCompatActivity implements Senso
             e.printStackTrace();
         }
 
-        // Check if user has given permission to record audio
-        int permissionCheck = ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.RECORD_AUDIO);
-        if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, PERMISSIONS_REQUEST_RECORD_AUDIO);
+        String[] PERMISSIONS = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.RECORD_AUDIO};
+
+        if(!hasPermissions(this, PERMISSIONS)){
+            ActivityCompat.requestPermissions(this, PERMISSIONS, PERMISSIONS_REQUEST_ALL);
         }
+
+        FragmentManager manager = getSupportFragmentManager();
+        mMapFragment = (MapFragment) manager.findFragmentById(R.id.map_fragment);
 
         View[] voiceViews = new View[1];
         voiceViews[0] = findViewById(R.id.voice_result);
@@ -106,6 +114,18 @@ public class MapsActivityCurrentPlace extends AppCompatActivity implements Senso
         voiceRec = new VoiceRecognition(getApplicationContext(), voiceViews, "start new trip", intent);
         runRecognizerSetup();
     }
+
+    public static boolean hasPermissions(Context context, String... permissions) {
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && context != null && permissions != null) {
+            for (String permission : permissions) {
+                if (ActivityCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
 
     public void setupNavigationMenu() {
         // Create the AccountHeader
@@ -232,10 +252,7 @@ public class MapsActivityCurrentPlace extends AppCompatActivity implements Senso
     @Override
     public void onSensorChanged(SensorEvent event) {
         if (event.values[0] == 0) {
-            Log.v("PROXIMITY", "CLOSE");
             mStartButton.performClick();
-        } else {
-            Log.v("PROXIMITY", "FAR");
         }
     }
 
@@ -287,7 +304,7 @@ public class MapsActivityCurrentPlace extends AppCompatActivity implements Senso
                     Toast.makeText(getApplicationContext(), "Could not init voice recognition", Toast.LENGTH_SHORT);
                 } else {
                     if (voiceRec != null) {
-                        voiceRec.switchSearch("wakeup"); //Speaking to wake up the recognizer
+                        voiceRec.switchSearch("wakeup");
                     }
                 }
             }
@@ -299,9 +316,12 @@ public class MapsActivityCurrentPlace extends AppCompatActivity implements Senso
                                            String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
-        if (requestCode == PERMISSIONS_REQUEST_RECORD_AUDIO) {
+        if (requestCode == 1) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 runRecognizerSetup();
+                mMapFragment.setPermissionGranted();
+                mMapFragment.updateLocationUI();
+                mMapFragment.getDeviceLocation();
             } else {
                 if (voiceRec != null) {
                     voiceRec.cancelVoiceDetection();
