@@ -12,7 +12,6 @@ import android.hardware.SensorManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
@@ -42,6 +41,8 @@ import java.io.File;
 import java.io.IOException;
 
 import edu.cmu.pocketsphinx.Assets;
+
+import static android.os.Build.VERSION_CODES.M;
 
 /**
  * An activity that displays a map showing the place at the device's current location.
@@ -84,15 +85,16 @@ public class MapsActivityCurrentPlace extends AppCompatActivity implements Senso
         // Setup side menu
         setupNavigationMenu();
 
-        // mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-        // mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
+        mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+        mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
 
         // Load cached data into temporary storage
 
         try {
             DataService.getInstance().readSessionsFromDatabase("DATABASE");
-            DataService.getInstance().readMapColorTypeFromDatabase("MAP_COLOR");
-            DataService.getInstance().readDriveModeFromDatabase("DRIVE_MODE");
+            DataService.getInstance().readFromSharedPreferences("MAP_COLOR");
+            DataService.getInstance().readFromSharedPreferences("DRIVE_MODE");
+            DataService.getInstance().readFromSharedPreferences("PROXIMITY_ACCESS");
         } catch (IOException e) {
             e.printStackTrace();
         } catch (ClassNotFoundException e) {
@@ -116,7 +118,7 @@ public class MapsActivityCurrentPlace extends AppCompatActivity implements Senso
     }
 
     public static boolean hasPermissions(Context context, String... permissions) {
-        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && context != null && permissions != null) {
+        if (android.os.Build.VERSION.SDK_INT >= M && context != null && permissions != null) {
             for (String permission : permissions) {
                 if (ActivityCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED) {
                     return false;
@@ -230,13 +232,21 @@ public class MapsActivityCurrentPlace extends AppCompatActivity implements Senso
     @Override
     public void onResume() {
         super.onResume();
-        // mSensorManager.registerListener(this, mSensor, SensorManager.SENSOR_DELAY_NORMAL);
+
+        if (DataService.getInstance().getProximityAccess().equals("TRUE")) {
+            mSensorManager.registerListener(this, mSensor, SensorManager.SENSOR_DELAY_NORMAL);
+        } else {
+            mSensorManager.unregisterListener(this);
+        }
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        // mSensorManager.unregisterListener(this);
+
+        if (DataService.getInstance().getProximityAccess().equals("TRUE")) {
+            mSensorManager.unregisterListener(this);
+        }
     }
 
     @Override

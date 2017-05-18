@@ -20,13 +20,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.animation.AlphaAnimation;
-import android.view.animation.Animation;
 import android.widget.Button;
-import android.widget.FrameLayout;
-import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -48,8 +42,6 @@ import java.util.TimerTask;
 import java.util.UUID;
 
 import edu.cmu.pocketsphinx.Assets;
-
-import static android.R.attr.textColor;
 
 
 public class NavigationActivity extends AppCompatActivity implements SensorEventListener {
@@ -333,7 +325,10 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
         super.onResume();
         mSensorManager.registerListener(this, mLinearAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
         mSensorManager.registerListener(this, mRotationSensor, SensorManager.SENSOR_DELAY_NORMAL);
-        // mSensorManager.registerListener(this, mProximitySensor, SensorManager.SENSOR_DELAY_NORMAL);
+
+        if (DataService.getInstance().getProximityAccess().equals("TRUE")) {
+            mSensorManager.registerListener(this, mProximitySensor, SensorManager.SENSOR_DELAY_NORMAL);
+        }
 
         if (!isRunning) {
             resetUI();
@@ -480,11 +475,17 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
 
         mLinearAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
         mRotationSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
-        // mProximitySensor = mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
+
+        if (DataService.getInstance().getProximityAccess().equals("TRUE")) {
+            mProximitySensor = mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
+        }
 
         mSensorManager.registerListener(this, mLinearAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
         mSensorManager.registerListener(this, mRotationSensor, SensorManager.SENSOR_DELAY_NORMAL);
-        //  mSensorManager.registerListener(this, mProximitySensor, SensorManager.SENSOR_DELAY_NORMAL);
+
+        if (DataService.getInstance().getProximityAccess().equals("TRUE")) {
+            mSensorManager.registerListener(this, mProximitySensor, SensorManager.SENSOR_DELAY_NORMAL);
+        }
     }
 
     public void saveSession() {

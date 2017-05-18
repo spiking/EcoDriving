@@ -1,6 +1,8 @@
 package com.example.currentplacedetailsonmap.services;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.util.Log;
 
 import com.example.currentplacedetailsonmap.models.Session;
 
@@ -32,6 +34,7 @@ public class DataService {
 
     public static String mMapColor = "LIGHT";
     public static String mDriveMode = "CAR";
+    public static String mProximityAccess = "FALSE";
 
     public static void writeSessionsToDatabase(String fileName) throws IOException {
         FileOutputStream fos = ApplicationContext.getAppContext().openFileOutput(fileName, Context.MODE_PRIVATE);
@@ -51,36 +54,28 @@ public class DataService {
         fis.close();
     }
 
-    public static void readMapColorTypeFromDatabase(String fileName) throws IOException, ClassNotFoundException {
-        FileInputStream fis = ApplicationContext.getAppContext().openFileInput(fileName);
-        ObjectInputStream is = new ObjectInputStream(fis);
-        mMapColor = (String) is.readObject();
-        is.close();
-        fis.close();
+    public static void saveToSharedPreferences(String key, String value) {
+        SharedPreferences preferences = ApplicationContext.getAppContext().getSharedPreferences("SHARED_PREF", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = preferences.edit();
+        Log.v("PREF", "ADDING " + key + " " + value);
+        editor.putString(key, value);
+        editor.commit();
     }
 
-    public static void saveMapColorTypeToDatabase(String fileName) throws IOException {
-        FileOutputStream fos = ApplicationContext.getAppContext().openFileOutput(fileName, Context.MODE_PRIVATE);
-        ObjectOutputStream os = new ObjectOutputStream(fos);
-        os.writeObject(mMapColor);
-        os.close();
-        fos.close();
-    }
+    public static void readFromSharedPreferences(String key) {
+        SharedPreferences preferences = ApplicationContext.getAppContext().getSharedPreferences("SHARED_PREF", Context.MODE_PRIVATE);
 
-    public static void readDriveModeFromDatabase(String fileName) throws IOException, ClassNotFoundException {
-        FileInputStream fis = ApplicationContext.getAppContext().openFileInput(fileName);
-        ObjectInputStream is = new ObjectInputStream(fis);
-        mDriveMode = (String) is.readObject();
-        is.close();
-        fis.close();
-    }
+        String value = preferences.getString(key, null);
 
-    public static void saveDriveModeToDatabase(String fileName) throws IOException {
-        FileOutputStream fos = ApplicationContext.getAppContext().openFileOutput(fileName, Context.MODE_PRIVATE);
-        ObjectOutputStream os = new ObjectOutputStream(fos);
-        os.writeObject(mDriveMode);
-        os.close();
-        fos.close();
+        if (key.equals("DRIVE_MODE")) {
+            mDriveMode = value;
+        } else if (key.equals("MAP_COLOR")) {
+            mMapColor = value;
+        } else if (key.equals("PROXIMITY_ACCESS")) {
+            mProximityAccess = value;
+        } else {
+            Log.wtf("WTF", "This should never get called");
+        }
     }
 
     public static void writeSessionToSessions(Session session) {
@@ -99,18 +94,27 @@ public class DataService {
         return mDriveMode;
     }
 
-    public void setDriveMode(String mDriveMode) throws IOException {
-        this.mDriveMode = mDriveMode;
-        saveDriveModeToDatabase("DRIVE_MODE");
+    public static void setDriveMode(String mNewDriveMode) throws IOException {
+        mDriveMode = mNewDriveMode;
+        saveToSharedPreferences("DRIVE_MODE", mDriveMode);
     }
 
     public String getMapColor() {
         return mMapColor;
     }
 
-    public void setMapColorDark(String mMapColor) throws IOException {
-        this.mMapColor = mMapColor;
-        saveMapColorTypeToDatabase("MAP_COLOR");
+    public static void setMapColorDark(String mNewMapColor) throws IOException {
+        mMapColor = mNewMapColor;
+        saveToSharedPreferences("MAP_COLOR", mMapColor);
+    }
+
+    public String getProximityAccess() {
+        return mProximityAccess;
+    }
+
+    public static void setProximityAccess(String mNewProximityAccess) throws IOException {
+        mProximityAccess = mNewProximityAccess;
+        saveToSharedPreferences("PROXIMITY_ACCESS", mProximityAccess);
     }
 
     public Map<Integer, Session> getSessions() {

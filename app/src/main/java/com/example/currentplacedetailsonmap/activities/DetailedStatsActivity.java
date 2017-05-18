@@ -101,13 +101,19 @@ public class DetailedStatsActivity extends AppCompatActivity {
 
         GraphView graph = (GraphView) findViewById(R.id.graph);
 
+
         if (mScores != null && mValues != null) {
+
             mSeries = new LineGraphSeries<>(mValues);
             mSeries.setThickness(15);
             mSeries.setColor(Color.parseColor("#4CAF50"));
-            graph.addSeries(mSeries);
             graph.getViewport().setScalable(true);
-            graph.getViewport().setScrollable(true);
+            graph.addSeries(mSeries);
+
+/*            GridLabelRenderer gridLabel = graph.getGridLabelRenderer();
+            gridLabel.setVerticalAxisTitle("Score");
+            gridLabel.setHorizontalAxisTitle("Timestamps");*/
+
         }
 
         mHandler.postDelayed(runnable, 500);

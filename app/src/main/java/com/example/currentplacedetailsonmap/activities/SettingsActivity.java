@@ -18,6 +18,7 @@ public class SettingsActivity extends AppCompatActivity {
     private Switch mMapSwitch;
     private TextView mSwitchText;
     private Switch mDriveModeSwitch;
+    private Switch mProximitySwitch;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,6 +33,7 @@ public class SettingsActivity extends AppCompatActivity {
         mSwitchText = (TextView) findViewById(R.id.map_color_text);
 
         mDriveModeSwitch = (Switch) findViewById(R.id.drive_mode_switch);
+        mProximitySwitch = (Switch) findViewById(R.id.proximity_switch);
 
         if (!DataService.getInstance().getMapColor().equals("DARK")) {
             mMapSwitch.setChecked(false);
@@ -82,6 +84,35 @@ public class SettingsActivity extends AppCompatActivity {
                 } else {
                     try {
                         DataService.getInstance().setDriveMode("BIKE");
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+            }
+        });
+
+        if (!DataService.getInstance().getProximityAccess().equals("TRUE")) {
+            mProximitySwitch.setChecked(false);
+        } else {
+            mProximitySwitch.setChecked(true);
+        }
+
+        mProximitySwitch.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                // TODO Auto-generated method stub
+
+                if(mProximitySwitch.isChecked()) {
+                    try {
+                        DataService.getInstance().setProximityAccess("TRUE");
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    try {
+                        DataService.getInstance().setProximityAccess("FALSE");
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
