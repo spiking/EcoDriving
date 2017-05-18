@@ -103,6 +103,17 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="20sp"
+            android:id="@+id/stats_red_screens"
+            android:layout_marginTop="24dp"
+            android:layout_marginLeft="24dp"
+            android:textColor="@color/cast_expanded_controller_progress_text_color"
+            android:layout_gravity="left"
+            />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="20sp"
             android:id="@+id/stats_distance"
             android:layout_marginTop="24dp"
             android:layout_marginLeft="24dp"

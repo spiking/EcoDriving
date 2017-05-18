@@ -6,6 +6,8 @@ import android.os.Handler;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.example.currentplacedetailsonmap.R;
@@ -14,6 +16,7 @@ import com.example.currentplacedetailsonmap.models.LatLngSerializedObject;
 import com.example.currentplacedetailsonmap.models.Session;
 import com.example.currentplacedetailsonmap.services.DataService;
 import com.jjoe64.graphview.GraphView;
+import com.jjoe64.graphview.GridLabelRenderer;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 
@@ -41,7 +44,7 @@ public class DetailedStatsActivity extends AppCompatActivity {
     private TextView mDistanceTextView;
     private TextView mTimeTextView;
     private TextView mAverageSpeedTextView;
-
+    private TextView mRedScreensTextView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -78,11 +81,13 @@ public class DetailedStatsActivity extends AppCompatActivity {
         }
 
         mScoreTextView = (TextView) findViewById(R.id.stats_score);
-        mScoreTextView.setText("Total score: " + Integer.toString(mScore));
+        mScoreTextView.setText("Score: " + Integer.toString(mScore));
         mDateTextView = (TextView) findViewById(R.id.stats_date);
         mDateTextView.setText("Date: " + mDate);
         mTimeTextView = (TextView) findViewById(R.id.stats_time);
         mTimeTextView.setText("Travel time: " + Long.toString(mTime) + " s");
+        mRedScreensTextView = (TextView) findViewById(R.id.stats_red_screens);
+        mRedScreensTextView.setText("Red Screens: " + mRedScreenMarkers.size());
 
         mDistanceTextView = (TextView) findViewById(R.id.stats_distance);
         mAverageSpeedTextView = (TextView) findViewById(R.id.stats_average_speed);
@@ -97,6 +102,12 @@ public class DetailedStatsActivity extends AppCompatActivity {
         mAverageSpeedTextView.setText("Average speed: " + String.format("%.0f", mAverageSpeed) + " km/h");
         mDistanceTextView.setText("Distance: " + String.format("%.0f", mDistance) + " m");
 
+/*        LineGraphSeries<DataPoint> series = new LineGraphSeries<>(new DataPoint[] {
+                new DataPoint(0, 1),
+                new DataPoint(1, 5),
+                new DataPoint(2, 3)
+        });*/
+
         addGraphData();
 
         GraphView graph = (GraphView) findViewById(R.id.graph);
@@ -107,18 +118,31 @@ public class DetailedStatsActivity extends AppCompatActivity {
             mSeries = new LineGraphSeries<>(mValues);
             mSeries.setThickness(15);
             mSeries.setColor(Color.parseColor("#4CAF50"));
-            graph.getViewport().setScalable(true);
-            graph.addSeries(mSeries);
 
-/*            GridLabelRenderer gridLabel = graph.getGridLabelRenderer();
+            GridLabelRenderer gridLabel = graph.getGridLabelRenderer();
             gridLabel.setVerticalAxisTitle("Score");
-            gridLabel.setHorizontalAxisTitle("Timestamps");*/
+            gridLabel.setHorizontalAxisTitle("Timestamps");
+
+            graph.addSeries(mSeries);
+            graph.getViewport().setScalable(true);
+
+/*          graph.getViewport().setXAxisBoundsManual(true);
+            graph.getViewport().setMaxX(mScores.size() + 1);
+            graph.getViewport().setMinX(0);*/
 
         }
 
         mHandler.postDelayed(runnable, 500);
         FragmentManager manager = getSupportFragmentManager();
         mapFragment = (MapFragment) manager.findFragmentById(R.id.map_fragment);
+    }
+
+    private void setMargins (View view, int left, int top, int right, int bottom) {
+        if (view.getLayoutParams() instanceof ViewGroup.MarginLayoutParams) {
+            ViewGroup.MarginLayoutParams p = (ViewGroup.MarginLayoutParams) view.getLayoutParams();
+            p.setMargins(left, top, right, bottom);
+            view.requestLayout();
+        }
     }
 
     private Handler mHandler = new Handler();

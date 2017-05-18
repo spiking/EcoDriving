@@ -211,7 +211,7 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
 
             if (mDriveMode.equals("BIKE")) {
 
-                if (mAccelerationValue > 1.75) {
+                if (mAccelerationValue > 1.5) {
                     updateFeedbackUI(Color.WHITE, "#F44336", R.string.feedback_bad, (int) (-mAccelerationValue * 10), false);
                     mScoreHandler.incrementBadCount();
                     mScoreHandler.setCurrentStreak(0);
@@ -223,7 +223,7 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
                         voiceFeedbackIsTimedOut = true;
                     }
 
-                } else if (mAccelerationValue > 1.5) {
+                } else if (mAccelerationValue > 1.25) {
                     updateFeedbackUI(Color.DKGRAY, "#FFEB3B", R.string.feedback_ok, mScoreHandler.getCurrentScore(), true);
                     mScoreHandler.incrementOkCount();
                     mScoreHandler.setCurrentStreak(0);
@@ -315,9 +315,9 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
         Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
             public void run() {
-                voiceFeedbackIsTimedOut = false; // Reset timeout after 10 sec
+                voiceFeedbackIsTimedOut = false; // Reset timeout after 15 sec
             }
-        }, 30000);
+        }, 15000);
     }
 
     @Override
