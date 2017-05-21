@@ -34,11 +34,12 @@ public class SettingsActivity extends AppCompatActivity {
 
         mDriveModeSwitch = (Switch) findViewById(R.id.drive_mode_switch);
         mProximitySwitch = (Switch) findViewById(R.id.proximity_switch);
-
-        if (!DataService.getInstance().getMapColor().equals("DARK")) {
-            mMapSwitch.setChecked(false);
-        } else {
-            mMapSwitch.setChecked(true);
+        if(DataService.getInstance().getMapColor() != null) {
+            if (!DataService.getInstance().getMapColor().equals("DARK")) {
+                mMapSwitch.setChecked(false);
+            } else {
+                mMapSwitch.setChecked(true);
+            }
         }
 
         mMapSwitch.setOnClickListener(new View.OnClickListener() {

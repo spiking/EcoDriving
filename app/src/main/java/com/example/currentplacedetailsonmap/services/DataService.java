@@ -91,6 +91,9 @@ public class DataService {
     }
 
     public String getDriveMode() {
+        if(mDriveMode == null){
+            mDriveMode = "CAR";
+        }
         return mDriveMode;
     }
 
@@ -100,6 +103,9 @@ public class DataService {
     }
 
     public String getMapColor() {
+        if(mMapColor == null){
+            mMapColor = "LIGHT";
+        }
         return mMapColor;
     }
 
@@ -109,6 +115,9 @@ public class DataService {
     }
 
     public String getProximityAccess() {
+        if(mProximityAccess == null){
+            mProximityAccess = "FALSE";
+        }
         return mProximityAccess;
     }
 

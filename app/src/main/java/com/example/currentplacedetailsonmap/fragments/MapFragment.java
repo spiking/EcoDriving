@@ -360,8 +360,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
 
         // Style map to styles defined in json file
 
-        if (!DataService.getInstance().getMapColor().equals("LIGHT")) {
-            styleMap();
+        if(DataService.getInstance().getMapColor() != null) {
+            if (!DataService.getInstance().getMapColor().equals("LIGHT")) {
+                styleMap();
+            }
         }
 
         // Setting onclick event listener for the map

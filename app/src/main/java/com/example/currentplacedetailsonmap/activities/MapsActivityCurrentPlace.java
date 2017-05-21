@@ -232,20 +232,22 @@ public class MapsActivityCurrentPlace extends AppCompatActivity implements Senso
     @Override
     public void onResume() {
         super.onResume();
-
-        if (DataService.getInstance().getProximityAccess().equals("TRUE")) {
-            mSensorManager.registerListener(this, mSensor, SensorManager.SENSOR_DELAY_NORMAL);
-        } else {
-            mSensorManager.unregisterListener(this);
+        if(DataService.getInstance().getProximityAccess() != null) {
+            if (DataService.getInstance().getProximityAccess().equals("TRUE")) {
+                mSensorManager.registerListener(this, mSensor, SensorManager.SENSOR_DELAY_NORMAL);
+            } else {
+                mSensorManager.unregisterListener(this);
+            }
         }
     }
 
     @Override
     public void onPause() {
         super.onPause();
-
-        if (DataService.getInstance().getProximityAccess().equals("TRUE")) {
-            mSensorManager.unregisterListener(this);
+        if(DataService.getInstance().getProximityAccess() != null) {
+            if (DataService.getInstance().getProximityAccess().equals("TRUE")) {
+                mSensorManager.unregisterListener(this);
+            }
         }
     }
 
