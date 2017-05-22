@@ -4,6 +4,7 @@ android {
     compileSdkVersion 25
     buildToolsVersion '25.0.0'
     defaultConfig {
+        multiDexEnabled true
         applicationId "com.example.currentplacedetailsonmap"
         minSdkVersion 15
         targetSdkVersion 25
