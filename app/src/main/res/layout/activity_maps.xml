@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.example.currentplacedetailsonmap.activities.MapsActivityCurrentPlace"
+    tools:context="com.example.currentplacedetailsonmap.activities.MainActivity"
     tools:layout_editor_absoluteY="25dp"
     android:layout_marginLeft="8dp"
     app:layout_constraintLeft_toLeftOf="@+id/map">

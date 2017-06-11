@@ -24,6 +24,7 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.example.currentplacedetailsonmap.R;
+import com.example.currentplacedetailsonmap.controller.VoiceRecognition;
 import com.example.currentplacedetailsonmap.fragments.MapFragment;
 import com.example.currentplacedetailsonmap.services.DataService;
 import com.mikepenz.materialdrawer.AccountHeader;
@@ -48,7 +49,7 @@ import static android.os.Build.VERSION_CODES.M;
  * An activity that displays a map showing the place at the device's current location.
  */
 
-public class MapsActivityCurrentPlace extends AppCompatActivity implements SensorEventListener {
+public class MainActivity extends AppCompatActivity implements SensorEventListener {
 
     // Side menu and toolbar customization.
     private Toolbar mToolbar;
@@ -169,18 +170,14 @@ public class MapsActivityCurrentPlace extends AppCompatActivity implements Senso
                         int id = (int) drawerItem.getIdentifier();
                         switch (id) {
                             case 1:
-                                Log.v("ID", id + " was chosen");
                                 break;
                             case 2:
-                                Log.v("ID", id + " was chosen");
                                 loadStatsView();
                                 break;
                             case 3:
-                                Log.v("ID", id + " was chosen");
                                 loadSlidesView();
                                 break;
                             case 4:
-                                Log.v("ID", id + " was chosen");
                                 loadSettingsView();
                                 break;
                             default:
@@ -209,7 +206,6 @@ public class MapsActivityCurrentPlace extends AppCompatActivity implements Senso
 
         // Verify that the intent will resolve to an activity
         if (intent.resolveActivity(getPackageManager()) != null) {
-            Log.v("LOAD", "Welcome slides activity was started");
             startActivity(intent);
         }
     }
@@ -220,8 +216,6 @@ public class MapsActivityCurrentPlace extends AppCompatActivity implements Senso
     }
 
     public void startSession(View view) {
-        Log.v("SESSION", "Start button was clicked");
-
         Intent intent = new Intent(this, NavigationActivity.class);
         intent.putExtra("INITIAL", "YES");
         startActivity(intent);
@@ -299,7 +293,7 @@ public class MapsActivityCurrentPlace extends AppCompatActivity implements Senso
             @Override
             protected Exception doInBackground(Void... params) {
                 try {
-                    Assets assets = new Assets(MapsActivityCurrentPlace.this);
+                    Assets assets = new Assets(MainActivity.this);
                     File assetDir = assets.syncAssets();
                     if (voiceRec != null) {
                         voiceRec.setupRecognizer(assetDir);

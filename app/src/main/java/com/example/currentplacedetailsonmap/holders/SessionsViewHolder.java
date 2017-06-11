@@ -24,7 +24,7 @@ public class SessionsViewHolder extends RecyclerView.ViewHolder {
     }
 
     public void updateUI(Session session) {
-        sessionScore.setText(Integer.toString(session.getCurrentScore()) + " poäng");
+        sessionScore.setText(Integer.toString(session.getCurrentScore()) + " points");
         sessionDate.setText(session.getDate());
     }
 }

@@ -1,4 +1,4 @@
-package com.example.currentplacedetailsonmap.activities;
+package com.example.currentplacedetailsonmap.services;
 
 import com.google.android.gms.maps.model.LatLng;
 

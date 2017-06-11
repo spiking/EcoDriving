@@ -28,7 +28,7 @@
  * ====================================================================
  */
 
-package com.example.currentplacedetailsonmap.activities;
+package com.example.currentplacedetailsonmap.controller;
 
 import android.content.Context;
 import android.content.Intent;
@@ -55,9 +55,6 @@ public class VoiceRecognition implements
 
     /* Named searches allow to quickly reconfigure the decoder */
     private static final String KWS_SEARCH = "wakeup";
-    private static final String MENU_SEARCH = "menu";
-    private static final String START_SEARCH = "start";
-    private static final String STOP_SEARCH = "stop";
 
     /* Keyword we are looking for to activate menu */
     private static String KEYPHRASE;
@@ -75,7 +72,6 @@ public class VoiceRecognition implements
         this.views = views;
         this.newIntent = newIntent;
         String currentDateTimeString = DateFormat.getDateTimeInstance().format(new Date());
-        Log.v("VOICE", "VoiceRecognition initiated at time: " + currentDateTimeString);
     }
 
     //Constructor for stopping activity
@@ -85,13 +81,11 @@ public class VoiceRecognition implements
         this.views = views;
         this.finishedButton = finishedButton;
         String currentDateTimeString = DateFormat.getDateTimeInstance().format(new Date());
-        Log.v("VOICE", "VoiceRecognition initiated at time: " + currentDateTimeString);
     }
 
     public void cancelVoiceDetection() {
         if (recognizer != null) {
             String currentDateTimeString = DateFormat.getDateTimeInstance().format(new Date());
-            Log.v("VOICE", "VoiceRecognition destroyed at time: " + currentDateTimeString);
             recognizer.cancel();
             recognizer.shutdown();
         }
@@ -108,8 +102,6 @@ public class VoiceRecognition implements
             return;
 
         String text = hypothesis.getHypstr();
-        Log.v("VOICE", "Captured partial: " + text);
-
         cancelVoiceDetection();
 
         ((TextView) views[0]).setText("");
@@ -142,8 +134,6 @@ public class VoiceRecognition implements
         ((TextView) views[0]).setText("");
         if (hypothesis != null) {
             String text = hypothesis.getHypstr();
-
-            Log.v("VOICE", "Captured onResult: " + text);
 
             if (KEYPHRASE.equals("cancel trip"))
                 makeText(context, "You stopped EcoDriving", Toast.LENGTH_SHORT).show();
@@ -208,19 +198,6 @@ public class VoiceRecognition implements
 
         // Create keyword-activation search.
         recognizer.addKeyphraseSearch(KWS_SEARCH, KEYPHRASE);
-
-        /*
-        // Create grammar-based search for digit recognition
-        File menuGrammar = new File(assetsDir, "menu.gram");
-        recognizer.addGrammarSearch(MENU_SEARCH, menuGrammar);
-
-        // Create grammar-based search for digit recognition
-        File startGrammar = new File(assetsDir, "driver.gram");
-        recognizer.addGrammarSearch(START_SEARCH, startGrammar);
-
-        // Create grammar-based search for digit recognition
-        File stopGrammar = new File(assetsDir, "driver.gram");
-        recognizer.addGrammarSearch(STOP_SEARCH, stopGrammar);*/
     }
 
     @Override

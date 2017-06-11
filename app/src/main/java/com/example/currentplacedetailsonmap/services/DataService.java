@@ -57,7 +57,6 @@ public class DataService {
     public static void saveToSharedPreferences(String key, String value) {
         SharedPreferences preferences = ApplicationContext.getAppContext().getSharedPreferences("SHARED_PREF", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = preferences.edit();
-        Log.v("PREF", "ADDING " + key + " " + value);
         editor.putString(key, value);
         editor.commit();
     }

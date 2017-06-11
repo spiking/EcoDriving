@@ -9,7 +9,6 @@ import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -39,14 +38,12 @@ public class WelcomeSlidesActivity extends AppCompatActivity {
         // Checking for first time launch - before calling setContentView()
         prefManager = new PrefManager(this);
         String showAgain = getIntent().getStringExtra("SHOW_ONCE_MORE");
-        Log.v("WELCOME", "showAgain is: " + showAgain);
 
         if(showAgain != null && showAgain.equals("Show"))
             prefManager.setFirstTimeLaunch(true);
 
 
         if (!prefManager.isFirstTimeLaunch()) {
-            Log.v("WELCOME", "Launching Home activity");
             launchHomeScreen();
             finish();
         }
@@ -63,9 +60,6 @@ public class WelcomeSlidesActivity extends AppCompatActivity {
         btnSkip = (Button) findViewById(R.id.btn_skip);
         btnNext = (Button) findViewById(R.id.btn_next);
 
-
-        // layouts of all welcome sliders
-        // add few more layouts if you want
         layouts = new int[]{
                 R.layout.welcome_slide1,
                 R.layout.welcome_slide2,
@@ -73,10 +67,7 @@ public class WelcomeSlidesActivity extends AppCompatActivity {
                 R.layout.welcome_slide4,
                 R.layout.welcome_slide5};
 
-        // adding bottom dots
         addBottomDots(0);
-
-        // making notification bar transparent
         changeStatusBarColor();
 
         myViewPagerAdapter = new MyViewPagerAdapter();
@@ -93,11 +84,11 @@ public class WelcomeSlidesActivity extends AppCompatActivity {
         btnNext.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // checking for last page
-                // if last page home screen will be launched
+                // Checking for last page
+                // If last page home screen will be launched
                 int current = getItem(+1);
                 if (current < layouts.length) {
-                    // move to next screen
+                    // Move to next screen
                     viewPager.setCurrentItem(current);
                 } else {
                     launchHomeScreen();
@@ -130,25 +121,23 @@ public class WelcomeSlidesActivity extends AppCompatActivity {
     }
 
     private void launchHomeScreen() {
-        prefManager.setFirstTimeLaunch(false); //Sätts till true om firstTime önskas varje gång
-        startActivity(new Intent(WelcomeSlidesActivity.this, MapsActivityCurrentPlace.class));
+        prefManager.setFirstTimeLaunch(false);
+        startActivity(new Intent(WelcomeSlidesActivity.this, MainActivity.class));
         finish();
     }
 
-    //  viewpager change listener
+    // Viewpager change listener
     ViewPager.OnPageChangeListener viewPagerPageChangeListener = new ViewPager.OnPageChangeListener() {
 
         @Override
         public void onPageSelected(int position) {
             addBottomDots(position);
 
-            // changing the next button text 'NEXT' / 'GOT IT'
+            //Cchanging the next button text 'NEXT' / 'GOT IT'
             if (position == layouts.length - 1) {
-                // last page. make button text to GOT IT
                 btnNext.setText(getString(R.string.start));
                 btnSkip.setVisibility(View.GONE);
             } else {
-                // still pages are left
                 btnNext.setText(getString(R.string.next));
                 btnSkip.setVisibility(View.VISIBLE);
             }

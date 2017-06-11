@@ -57,7 +57,7 @@ public class Session implements Serializable, Comparable {
 
     @Override
     public int compareTo(@NonNull Object o) {
-        if(o instanceof Session) {
+        if (o instanceof Session) {
             return date.compareTo(((Session) o).getDate());
         }
         return 0;

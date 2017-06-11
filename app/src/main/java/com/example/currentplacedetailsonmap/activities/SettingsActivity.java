@@ -46,7 +46,6 @@ public class SettingsActivity extends AppCompatActivity {
 
             @Override
             public void onClick(View v) {
-                // TODO Auto-generated method stub
 
                 if(mMapSwitch.isChecked()) {
                     try {
@@ -74,7 +73,6 @@ public class SettingsActivity extends AppCompatActivity {
 
             @Override
             public void onClick(View v) {
-                // TODO Auto-generated method stub
 
                 if(mDriveModeSwitch.isChecked()) {
                     try {
@@ -103,7 +101,6 @@ public class SettingsActivity extends AppCompatActivity {
 
             @Override
             public void onClick(View v) {
-                // TODO Auto-generated method stub
 
                 if(mProximitySwitch.isChecked()) {
                     try {

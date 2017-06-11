@@ -26,6 +26,7 @@ import android.widget.Toast;
 
 import com.example.currentplacedetailsonmap.R;
 import com.example.currentplacedetailsonmap.controller.ScoreHandler;
+import com.example.currentplacedetailsonmap.controller.VoiceRecognition;
 import com.example.currentplacedetailsonmap.fragments.MapFragment;
 import com.example.currentplacedetailsonmap.models.LatLngSerializedObject;
 import com.example.currentplacedetailsonmap.models.Session;
@@ -134,7 +135,6 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
         mDriveMode = DataService.getInstance().getDriveMode();
 
         mStartTimeStamp = System.currentTimeMillis() / 1000;
-        Log.v("ROUTE", Long.toString(mStartTimeStamp));
 
         FragmentManager manager = getSupportFragmentManager();
         mapFragment = (MapFragment) manager.findFragmentById(R.id.map_fragment);
@@ -241,14 +241,10 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
                 }
 
             }
-
-
         }
     };
 
     public void updateFeedbackUI(int textColor, String backgroundColor, int feedbackString, int scoreChange, boolean feedbackOk) {
-
-        // Dont change score at ok screen
 
         if (!feedbackOk) {
             mScoreHandler.setCurrentScore(mScoreHandler.getCurrentScore() + scoreChange);
@@ -260,56 +256,10 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
         mCurrentScoreTextView.setTextColor(textColor);
         mAccelerationFeedbackTextView.setTextColor(textColor);
         findViewById(R.id.navigation_layout).setBackgroundColor(Color.parseColor(backgroundColor));
-        /*animateScore(scoreChange, 20, Color.WHITE, false);*/
         mAccelerationFeedbackTextView.setText(getString(feedbackString));
         mCurrentScoreTextView.setText(Double.toString(mScoreHandler.getCurrentScore()));
 
     }
-
-    /*private void animateScore(int score, float textSize, int textColor, boolean idle){
-        if(!idle) {
-            int totalScore = mScoreHandler.getCurrentScore();
-
-            FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) animationText.getLayoutParams();
-
-            //Flytta animationen beroende på antal poäng
-            if(totalScore < 100){
-                Log.v("ANIMATION", "margin 10");
-                params.leftMargin = 150;
-            }
-            else if(totalScore >= 100 && totalScore < 1000){
-                Log.v("ANIMATION", "margin 100");
-                params.leftMargin = 200;
-            }
-            else if(totalScore >= 1000 && totalScore < 10000){
-                Log.v("ANIMATION", "margin 1000");
-                params.leftMargin = 150;
-
-            }
-            else{
-                Log.v("ANIMATION", "margin 10000");
-                params.leftMargin = 150;
-            }
-
-            animationText.setLayoutParams(params);
-            animationText.setTextSize(textSize);
-            animationText.setTextColor(textColor);
-            animationText.setText("+" + score);
-
-            Animation in = new AlphaAnimation(0.0f, 1.0f);
-            in.setDuration(300);
-
-            Animation out = new AlphaAnimation(1.0f, 0.0f);
-            out.setDuration(300);
-
-            animationText.startAnimation(in);
-            animationText.startAnimation(out);
-        }else{
-            animationText.setText("");
-        }
-
-
-    }*/
 
     public void voiceFeedbackTimeout() {
         Handler handler = new Handler();
@@ -333,13 +283,10 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
         if (!isRunning) {
             resetUI();
             createRecognizer("start trip", false);
-            Log.v("VOICE", "RESUME - START TRIP");
             mProximityBoolean = true;
         }
 
         mDriveMode = DataService.getInstance().getDriveMode();
-
-        Log.v("VOICE", "RESUME");
     }
 
     @Override
@@ -359,8 +306,6 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
         }
 
         isRunning = false;
-
-        Log.v("VOICE", "PAUSE");
     }
 
     @Override
@@ -412,11 +357,6 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
 
             mAccelerationValue = getAverageAcceleration();
 
-/*            Log.v("VALUE", " = " + mAccelerationCounter);
-            Log.v("VALUE", " = " + mAccelerationValue);
-            Log.v("VALUE X", "X = " + event.values[0]);
-            Log.v("VALUE Y", "Y = " + event.values[1]);
-            Log.v("VALUE Z", "Z = " + event.values[2]);*/
         }
 
         if (event.sensor == mRotationSensor) {
@@ -433,15 +373,11 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
         if (event.sensor == mProximitySensor) {
             if (event.values[0] == 0) {
                 if (mProximityBoolean) {
-                    Log.v("PROXIMITY", "CLOSE");
                     mSessionButton.performClick();
                     mProximityBoolean = false;
                 } else {
                     mProximityBoolean = true;
                 }
-
-            } else {
-                Log.v("PROXIMITY", "FAR");
             }
         }
     }
@@ -538,8 +474,6 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
 
         int x = DataService.getInstance().getSessionMapSize() - 1;
 
-        Log.v("INDEX", "INDEX = " + x);
-
         Intent i = new Intent(getApplicationContext(), DetailedStatsActivity.class);
         i.putExtra("INDEX", DataService.getInstance().getSessionMapSize() - 1);
         startActivity(i);
@@ -559,8 +493,6 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
 
     public void sessionButtonClicked(View view) {
 
-        Log.v("SESSION CHANGED", "Session btn clicked!");
-
         if (isRunning) {
             saveSession();
             isRunning = false;
@@ -568,7 +500,6 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
             startSession();
             mapFragment.startRouteNavigation();
             mapFragment.resetRedScreenMarkers();
-            Log.v("VOICE", "Session btn clicked!");
             voiceRec.cancelVoiceDetection();
             createRecognizer("cancel trip", false);
             isRunning = true;
@@ -620,7 +551,7 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
                 if (result != null) {
                     Toast.makeText(getApplicationContext(), "Could not init voice recognition", Toast.LENGTH_SHORT);
                 } else {
-                    voiceRec.switchSearch("wakeup"); //Speaking to wake up the recognizer
+                    voiceRec.switchSearch("wakeup");
                 }
             }
         }.execute();
@@ -630,11 +561,9 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
         View[] voiceViews = new View[1];
         voiceViews[0] = findViewById(R.id.voice_result_2);
         if (backToHome) {
-            Log.v("VOICE", "backToHome true");
             Intent intent = new Intent(getApplicationContext(), NavigationActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             voiceRec = new VoiceRecognition(getApplicationContext(), voiceViews, keyphrase, intent);
         } else {
-            Log.v("VOICE", "backToHome false");
             voiceRec = new VoiceRecognition(getApplicationContext(), voiceViews, keyphrase, mSessionButton);
         }
         runRecognizerSetup();
@@ -668,7 +597,6 @@ public class NavigationActivity extends AppCompatActivity implements SensorEvent
     @Override
     public void onBackPressed() {
         setResult(RESULT_CANCELED);
-        Log.v("VOICE", "Back button pressed");
         voiceRec.cancelVoiceDetection();
         createRecognizer("start trip", true);
         super.onBackPressed();

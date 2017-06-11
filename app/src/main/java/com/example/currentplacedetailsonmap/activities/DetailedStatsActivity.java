@@ -6,8 +6,6 @@ import android.os.Handler;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.View;
-import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.example.currentplacedetailsonmap.R;
@@ -102,12 +100,6 @@ public class DetailedStatsActivity extends AppCompatActivity {
         mAverageSpeedTextView.setText("Average speed: " + String.format("%.0f", mAverageSpeed) + " km/h");
         mDistanceTextView.setText("Distance: " + String.format("%.0f", mDistance) + " m");
 
-/*        LineGraphSeries<DataPoint> series = new LineGraphSeries<>(new DataPoint[] {
-                new DataPoint(0, 1),
-                new DataPoint(1, 5),
-                new DataPoint(2, 3)
-        });*/
-
         addGraphData();
 
         GraphView graph = (GraphView) findViewById(R.id.graph);
@@ -126,23 +118,11 @@ public class DetailedStatsActivity extends AppCompatActivity {
             graph.addSeries(mSeries);
             graph.getViewport().setScalable(true);
 
-/*          graph.getViewport().setXAxisBoundsManual(true);
-            graph.getViewport().setMaxX(mScores.size() + 1);
-            graph.getViewport().setMinX(0);*/
-
         }
 
         mHandler.postDelayed(runnable, 500);
         FragmentManager manager = getSupportFragmentManager();
         mapFragment = (MapFragment) manager.findFragmentById(R.id.map_fragment);
-    }
-
-    private void setMargins (View view, int left, int top, int right, int bottom) {
-        if (view.getLayoutParams() instanceof ViewGroup.MarginLayoutParams) {
-            ViewGroup.MarginLayoutParams p = (ViewGroup.MarginLayoutParams) view.getLayoutParams();
-            p.setMargins(left, top, right, bottom);
-            view.requestLayout();
-        }
     }
 
     private Handler mHandler = new Handler();

@@ -11,13 +11,11 @@ import java.io.ObjectOutputStream;
  */
 
 public class LatLngSerializedObject implements java.io.Serializable {
-    // mark it transient so defaultReadObject()/defaultWriteObject() ignore it
-    private transient com.google.android.gms.maps.model.LatLng mLocation;
 
+    private transient com.google.android.gms.maps.model.LatLng mLocation;
     public LatLngSerializedObject(LatLng mLocation) {
         this.mLocation = mLocation;
     }
-
     public LatLng getLatLng() {
         return mLocation;
     }

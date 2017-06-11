@@ -22,8 +22,8 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.example.currentplacedetailsonmap.R;
-import com.example.currentplacedetailsonmap.activities.DataParser;
-import com.example.currentplacedetailsonmap.activities.MapsActivityCurrentPlace;
+import com.example.currentplacedetailsonmap.services.DataParser;
+import com.example.currentplacedetailsonmap.activities.MainActivity;
 import com.example.currentplacedetailsonmap.models.LatLngSerializedObject;
 import com.example.currentplacedetailsonmap.services.DataService;
 import com.google.android.gms.common.ConnectionResult;
@@ -72,7 +72,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
         GoogleApiClient.OnConnectionFailedListener {
 
     private AntiScrollMapView mMapView;
-    private static final String TAG = MapsActivityCurrentPlace.class.getSimpleName();
+    private static final String TAG = MainActivity.class.getSimpleName();
     private GoogleMap mMap;
     private CameraPosition mCameraPosition;
 
@@ -197,8 +197,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
 
     }
 
-    // Not in use
-
     public void drawRoute(ArrayList<LatLngSerializedObject> route) {
 
         PolylineOptions options = new PolylineOptions().width(15).color(Color.parseColor("#2196F3")).geodesic(true);
@@ -222,8 +220,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
 
         }
 
-        Log.v("DISTANCE", Double.toString(mTravelDistance));
-
         mLine = mMap.addPolyline(options);
     }
 
@@ -244,9 +240,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
         }
 
         mMap.addMarker(options);
-
-        Log.v("RED", "Added all red markers on map! START END");
-
     }
 
     public void addRedScreenMarkersToMap(ArrayList<LatLngSerializedObject> mRedScreenMarkers) {
@@ -258,18 +251,15 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
             options.position(mRedScreenMarkers.get(i).getLatLng());
             options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
             mMap.addMarker(options);
-            Log.v("RED", "Added all red markers on map!");
         }
     }
 
     public void addRedScreenMarker() {
-        Log.v("RED", "Added a new marker!");
         mRedScreenMarkerPoints.add(new LatLngSerializedObject(
                 new LatLng(mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude())));
     }
 
     public ArrayList<LatLngSerializedObject> getRedScreenMarkerPoints() {
-        Log.v("RED", "SIZE = " + mRedScreenMarkerPoints.size());
         return mRedScreenMarkerPoints;
     }
 
@@ -372,8 +362,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
             @Override
             public void onMapClick(LatLng point) {
 
-                System.out.println("Map clicked!");
-
                 // Already two locations
                 if (mMarkerPoints.size() > 1) {
                     mMarkerPoints.clear();
@@ -410,7 +398,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
 
                     // Getting URL to the Google Directions API
                     String url = getUrl(origin, dest);
-                    Log.d("onMapClick", url.toString());
                     FetchUrl FetchUrl = new FetchUrl();
 
                     // Start downloading json data from Google Directions API
